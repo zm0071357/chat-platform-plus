@@ -51,6 +51,13 @@ public class LoginRepositoryImpl implements LoginRepository {
                     .message(LoginConstant.Fail)
                     .build();
         }
+        // 黑名单
+        if(existUser.getIsBlack() == 1) {
+            return LoginResEntity.builder()
+                    .isSuccess(false)
+                    .message(LoginConstant.Black)
+                    .build();
+        }
         return LoginResEntity.builder()
                 .isSuccess(true)
                 .userId(existUser.getUserId())
@@ -79,6 +86,13 @@ public class LoginRepositoryImpl implements LoginRepository {
         User existUser = userDao.getUserByUserEmail(loginByVCEntity.getUserEmail());
         // 用户是否存在
         if (existUser != null) {
+            // 黑名单
+            if(existUser.getIsBlack() == 1) {
+                return LoginResEntity.builder()
+                        .isSuccess(false)
+                        .message(LoginConstant.Black)
+                        .build();
+            }
             // 删除验证码
             redissonClient.getBucket(key).delete();
             return LoginResEntity.builder()
