@@ -1,0 +1,1 @@
+package chat.platform.plus.domain.chat.adapter;
