@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chat.platform.plus.infrastructure.dao.UserDao">
+
+    <!-- 用户表映射结果集 -->
+    <resultMap id="UserResultMap" type="chat.platform.plus.infrastructure.dao.po.User">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="user_email" property="userEmail" jdbcType="VARCHAR"/>
+        <result column="is_black" property="isBlack" jdbcType="INTEGER"/>
+        <result column="is_vip" property="isVip" jdbcType="INTEGER"/>
+        <result column="count" property="count" jdbcType="INTEGER"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 通过账号获取用户 -->
+    <select id="getUserByUserId" resultMap="UserResultMap">
+        SELECT id, user_id, user_name, user_email, is_black, is_vip, count, password, create_time, update_time
+        FROM user
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 通过邮箱获取用户 -->
+    <select id="getUserByUserEmail" resultMap="UserResultMap">
+        SELECT id, user_id, user_name, user_email, is_black, is_vip, count, password, create_time, update_time
+        FROM user
+        WHERE user_email = #{userEmail}
+    </select>
+
+    <!-- 新增用户 -->
+    <insert id="insert" parameterType="chat.platform.plus.infrastructure.dao.po.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (
+            user_id,
+            user_name,
+            user_email,
+            password,
+            create_time,
+            update_time
+        ) VALUES (
+                     #{userId},
+                     #{userName},
+                     #{userEmail},
+                     #{password},
+                     now(),
+                     now()
+                 )
+    </insert>
+
+</mapper>
