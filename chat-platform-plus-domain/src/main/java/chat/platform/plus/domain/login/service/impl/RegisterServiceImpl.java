@@ -6,10 +6,9 @@ import chat.platform.plus.domain.login.model.entity.RegisterResEntity;
 import chat.platform.plus.domain.login.model.entity.VCEntity;
 import chat.platform.plus.domain.login.service.RegisterService;
 import cn.dev33.satoken.stp.StpUtil;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 @Slf4j
 @Service
@@ -24,6 +23,7 @@ public class RegisterServiceImpl implements RegisterService {
         if (registerResEntity.getIsSuccess()) {
             // 登录
             StpUtil.login(registerResEntity.getUserId());
+            registerResEntity.setToken(StpUtil.getTokenValue());
             log.info("登录成功:{}", registerResEntity.getUserId());
         }
         return registerResEntity;

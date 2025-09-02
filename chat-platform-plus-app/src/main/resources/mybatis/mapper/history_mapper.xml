@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chat.platform.plus.infrastructure.dao.HistoryDao">
+
+    <resultMap id="dataMap" type="chat.platform.plus.infrastructure.dao.po.History">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="history_code" property="historyCode"/>
+        <result column="history_json" property="historyJson"/>
+        <result column="request_json" property="requestJson"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="getHistory" resultMap="dataMap">
+        select history_json
+        from history
+        where user_id = #{userId} and history_code = #{historyCode}
+    </select>
+
+    <select id="getRequestHistory" resultMap="dataMap">
+        select request_json
+        from history
+        where user_id = #{userId} and history_code = #{historyCode}
+    </select>
+
+    <select id="getHistoryCodeList" resultType="java.lang.String">
+        select history_code
+        from history
+        where user_id = #{userId}
+        order by update_time desc
+    </select>
+
+    <insert id="insert" parameterType="chat.platform.plus.infrastructure.dao.po.History">
+        insert into history (user_id, history_code, history_json, request_json, create_time, update_time) values
+            (#{userId}, #{historyCode}, #{historyJson}, #{requestJson}, now(), now())
+    </insert>
+
+    <update id="update" parameterType="chat.platform.plus.infrastructure.dao.po.History">
+        update history
+        set
+            history_json = #{historyJson},
+            request_json = #{requestJson},
+            update_time = now()
+        where
+            user_id = #{userId}
+          and history_code = #{historyCode}
+    </update>
+
+</mapper>

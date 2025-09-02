@@ -8,12 +8,10 @@ import chat.platform.plus.domain.login.model.entity.LoginResEntity;
 import chat.platform.plus.domain.login.model.entity.VCEntity;
 import chat.platform.plus.domain.login.model.valobj.LoginConstant;
 import chat.platform.plus.domain.login.service.LoginService;
-import chat.platform.plus.types.utils.JavaMailUtil;
 import cn.dev33.satoken.stp.StpUtil;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 @Slf4j
 @Service
@@ -32,6 +30,7 @@ public class LoginServiceImpl implements LoginService {
         if (loginResEntity.getIsSuccess()) {
             // 登录
             StpUtil.login(loginResEntity.getUserId());
+            loginResEntity.setToken(StpUtil.getTokenValue());
             log.info("登录成功:{}", loginResEntity.getUserId());
         }
         return loginResEntity;
@@ -44,6 +43,7 @@ public class LoginServiceImpl implements LoginService {
         if (loginResEntity.getIsSuccess()) {
             // 登录
             StpUtil.login(loginResEntity.getUserId());
+            loginResEntity.setToken(StpUtil.getTokenValue());
             log.info("登录成功:{}", loginResEntity.getUserId());
         }
         return loginResEntity;

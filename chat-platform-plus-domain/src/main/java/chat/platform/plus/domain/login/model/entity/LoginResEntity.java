@@ -25,6 +25,11 @@ public class LoginResEntity {
     private Boolean isSuccess;
 
     /**
+     * token
+     */
+    private String token;
+
+    /**
      * 文本信息
      */
     private String message;

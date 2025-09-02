@@ -21,12 +21,16 @@
             <artifactId>lombok</artifactId>
         </dependency>
         <dependency>
-            <groupId>cn.dev33</groupId>
-            <artifactId>sa-token-spring-boot-starter</artifactId>
+            <groupId>top.xiaoming-programming</groupId>
+            <artifactId>chat-platform-plus-types</artifactId>
         </dependency>
         <dependency>
             <groupId>top.xiaoming-programming</groupId>
-            <artifactId>chat-platform-plus-types</artifactId>
+            <artifactId>qwen-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
         </dependency>
     </dependencies>
 

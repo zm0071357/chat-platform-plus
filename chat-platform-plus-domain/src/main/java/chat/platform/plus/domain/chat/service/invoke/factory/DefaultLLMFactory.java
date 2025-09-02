@@ -1,20 +1,22 @@
 package chat.platform.plus.domain.chat.service.invoke.factory;
 
-import chat.platform.plus.domain.chat.model.entity.LLMHandleEntity;
-import chat.platform.plus.domain.chat.model.entity.MessageEntity;
+import chat.platform.plus.domain.chat.model.entity.HandleEntity;
+import chat.platform.plus.domain.chat.model.entity.CheckEntity;
 import chat.platform.plus.domain.chat.model.entity.UserEntity;
 import chat.platform.plus.domain.chat.service.invoke.filter.DCCFilter;
+import chat.platform.plus.domain.chat.service.invoke.filter.FileFilter;
 import chat.platform.plus.domain.chat.service.invoke.filter.LLMFilter;
 import chat.platform.plus.domain.chat.service.invoke.filter.UserFilter;
 import chat.platform.plus.types.design.framework.link.LogicLink;
+import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 
 /**
  * 大模型调用过滤工厂
@@ -30,14 +32,18 @@ public class DefaultLLMFactory {
     private UserFilter userFilter;
 
     @Resource
+    private FileFilter fileFilter;
+
+    @Resource
     private LLMFilter llmFilter;
 
     /**
      * 组装责任链
      */
-    public LogicLink<MessageEntity, DynamicContext, LLMHandleEntity> openLogicLink() {
+    public LogicLink<CheckEntity, DynamicContext, HandleEntity> openLogicLink() {
         dccFilter.appendNext(userFilter);
-        userFilter.appendNext(llmFilter);
+        userFilter.appendNext(fileFilter);
+        fileFilter.appendNext(llmFilter);
         return dccFilter;
     }
 
@@ -54,6 +60,16 @@ public class DefaultLLMFactory {
          * 用户校验实体
          */
         private UserEntity userEntity;
+
+        /**
+         * 上传文件
+         */
+        private MultipartFile file;
+
+        /**
+         * 结束节点位置
+         */
+        private Integer endFilter;
     }
 
 }

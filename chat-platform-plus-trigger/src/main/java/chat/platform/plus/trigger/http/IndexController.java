@@ -11,8 +11,7 @@ import chat.platform.plus.types.utils.EmailUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Slf4j
 @CrossOrigin
@@ -32,8 +31,8 @@ public class IndexController implements IndexService {
         // 参数校验
         if (StringUtils.isBlank(loginByPWReqDTO.getPassword()) || StringUtils.isBlank(loginByPWReqDTO.getUserId())) {
             return Response.<LoginResDTO>builder()
-                    .code(CommonEnum.LACK_PARM.getCode())
-                    .info(CommonEnum.LACK_PARM.getInfo())
+                    .code(CommonEnum.LACK_PARAM.getCode())
+                    .info(CommonEnum.LACK_PARAM.getInfo())
                     .build();
         }
         LoginByPWEntity loginByPWEntity = LoginByPWEntity.builder()
@@ -46,6 +45,7 @@ public class IndexController implements IndexService {
                 .data(LoginResDTO.builder()
                         .isSuccess(loginResEntity.getIsSuccess())
                         .message(loginResEntity.getMessage())
+                        .token(loginResEntity.getToken())
                         .userId(loginResEntity.getUserId())
                         .build())
                 .info(CommonEnum.SUCCESS.getInfo())
@@ -58,8 +58,8 @@ public class IndexController implements IndexService {
         // 参数非空校验
         if (StringUtils.isBlank(loginByVCReqDTO.getUserEmail()) || StringUtils.isBlank(loginByVCReqDTO.getVC())) {
             return Response.<LoginResDTO>builder()
-                    .code(CommonEnum.LACK_PARM.getCode())
-                    .info(CommonEnum.LACK_PARM.getInfo())
+                    .code(CommonEnum.LACK_PARAM.getCode())
+                    .info(CommonEnum.LACK_PARAM.getInfo())
                     .build();
         }
         // 参数合法性校验
@@ -79,6 +79,7 @@ public class IndexController implements IndexService {
                 .data(LoginResDTO.builder()
                         .isSuccess(loginResEntity.getIsSuccess())
                         .message(loginResEntity.getMessage())
+                        .token(loginResEntity.getToken())
                         .userId(loginResEntity.getUserId())
                         .build())
                 .info(CommonEnum.SUCCESS.getInfo())
@@ -92,8 +93,8 @@ public class IndexController implements IndexService {
         if (StringUtils.isBlank(registerReqDTO.getUserName()) || StringUtils.isBlank(registerReqDTO.getUserEmail()) ||
                 StringUtils.isBlank(registerReqDTO.getPassword()) || StringUtils.isBlank(registerReqDTO.getVC())) {
             return Response.<RegisterResDTO>builder()
-                    .code(CommonEnum.LACK_PARM.getCode())
-                    .info(CommonEnum.LACK_PARM.getInfo())
+                    .code(CommonEnum.LACK_PARAM.getCode())
+                    .info(CommonEnum.LACK_PARAM.getInfo())
                     .build();
         }
         // 参数合法性校验
@@ -114,6 +115,8 @@ public class IndexController implements IndexService {
                 .code(CommonEnum.SUCCESS.getCode())
                 .data(RegisterResDTO.builder()
                         .isSuccess(registerResEntity.getIsSuccess())
+                        .token(registerResEntity.getToken())
+                        .userId(registerResEntity.getUserId())
                         .message(registerResEntity.getMessage())
                         .build())
                 .info(CommonEnum.SUCCESS.getInfo())

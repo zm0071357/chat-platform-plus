@@ -6,37 +6,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 大模型处理结果实体
+ * 历史记录编码实体
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LLMHandleEntity {
+public class HistoryCodeEntity {
 
     /**
-     * 用户ID
+     * 历史记录名称
      */
-    private String userId;
+    private String historyName;
 
-    /**
+    /***
      * 历史记录编码
      */
     private String historyCode;
-
-    /**
-     * 是否成功
-     */
-    private Boolean isSuccess;
-
-    /**
-     * 处理结果
-     */
-    private String result;
-
-    /**
-     * 返回信息
-     */
-    private String message;
 
 }

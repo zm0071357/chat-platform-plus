@@ -3,6 +3,7 @@ package chat.platform.plus.infrastructure.dao;
 import chat.platform.plus.infrastructure.dao.po.User;
 import org.apache.ibatis.annotations.Mapper;
 
+
 @Mapper
 public interface UserDao {
 

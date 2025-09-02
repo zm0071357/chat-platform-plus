@@ -1,12 +1,12 @@
 package chat.platform.plus.types.utils;
 
+import jakarta.annotation.Resource;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import javax.mail.internet.MimeMessage;
 
 /**
  * 发送邮件工具类

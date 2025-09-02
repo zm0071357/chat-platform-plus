@@ -25,6 +25,11 @@ public class RegisterResDTO {
     private String userId;
 
     /**
+     * token
+     */
+    private String token;
+
+    /**
      * 文本信息
      */
     private String message;

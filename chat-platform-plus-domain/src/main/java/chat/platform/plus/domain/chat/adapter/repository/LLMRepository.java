@@ -1,6 +1,8 @@
 package chat.platform.plus.domain.chat.adapter.repository;
 
-import chat.platform.plus.domain.chat.model.entity.UserEntity;
+import chat.platform.plus.domain.chat.model.entity.*;
+
+import java.util.List;
 
 public interface LLMRepository {
 
@@ -23,4 +25,25 @@ public interface LLMRepository {
      */
     boolean cutRange(String userId);
 
+    /**
+     * 上传文件
+     * @param uploadFileEntity
+     * @return
+     */
+    UpLoadFileResEntity uploadFile(UploadFileEntity uploadFileEntity);
+
+    /**
+     * 获取历史记录
+     * @param userId
+     * @param historyCode
+     * @return
+     */
+    HistoryEntity getHistory(String userId, String historyCode);
+
+    /**
+     * 获取历史记录编码集合
+     * @param userId
+     * @return
+     */
+    List<HistoryCodeEntity> getHistoryCodeList(String userId);
 }

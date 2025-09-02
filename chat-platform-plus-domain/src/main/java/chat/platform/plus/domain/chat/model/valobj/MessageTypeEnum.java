@@ -11,10 +11,11 @@ import lombok.Getter;
 public enum MessageTypeEnum {
 
     TEXT(1, "普通文本"),
-    CREATE_IMAGE(2, "生成图片"),
-    CREATE_VIDEO(3, "生成视频"),
-    RAG(4, "RAG知识库"),
-    DEFAULT(5, "默认"),
+    TEXT_WITH_FILE(2, "文本带文件"),
+    CREATE_IMAGE(3, "生成图片"),
+    CREATE_VIDEO(4, "生成视频"),
+    RAG(5, "RAG知识库"),
+    DEFAULT(6, "默认"),
     ;
 
     private Integer type;
@@ -30,10 +31,12 @@ public enum MessageTypeEnum {
             case 1:
                 return TEXT;
             case 2:
-                return CREATE_IMAGE;
+                return TEXT_WITH_FILE;
             case 3:
-                return CREATE_VIDEO;
+                return CREATE_IMAGE;
             case 4:
+                return CREATE_VIDEO;
+            case 5 :
                 return RAG;
             default:
                 return DEFAULT;

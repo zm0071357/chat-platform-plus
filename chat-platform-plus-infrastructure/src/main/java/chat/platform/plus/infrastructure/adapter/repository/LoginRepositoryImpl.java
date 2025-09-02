@@ -15,8 +15,7 @@ import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Repository;
-
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Slf4j
 @Repository
