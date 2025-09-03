@@ -1,21 +1,21 @@
 package chat.platform.plus.domain.chat.model.entity;
 
+import chat.platform.plus.types.common.File;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import qwen.sdk.largemodel.chat.model.ChatRequest;
 
 import java.util.List;
 
 /**
- * 历史记录实体
+ * 创作视频请求实体
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class HistoryEntity {
+public class CreateVidEntity {
 
     /**
      * 账号
@@ -28,14 +28,27 @@ public class HistoryEntity {
     private String historyCode;
 
     /**
-     * 历史记录
+     * 内容
      */
-    private List<ChatRequest.Input.Message> historyMessages;
-
+    private String content;
 
     /**
-     * 历史请求记录
+     * 消息类型
      */
-    private List<ChatRequest.Input.Message> requestMessages;
+    private Integer messageType;
 
+    /**
+     * 视频创作类型
+     */
+    private String vidFunction;
+
+    /**
+     * 文件列表
+     */
+    private List<File> fileList;
+
+    /**
+     * 文件总大小
+     */
+    private Long fileListSize;
 }

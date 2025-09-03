@@ -40,4 +40,8 @@ public interface LLMService {
      * @return
      */
     List<ChatRequest.Input.Message> getHistory(String userId, String historyCode);
+
+
+    
+
 }

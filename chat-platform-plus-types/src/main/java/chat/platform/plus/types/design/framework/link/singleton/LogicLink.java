@@ -1,4 +1,4 @@
-package chat.platform.plus.types.design.framework.link;
+package chat.platform.plus.types.design.framework.link.singleton;
 
 /**
  * 单例规则责任链接口

@@ -3,11 +3,15 @@ package chat.platform.plus.trigger.http;
 import chat.platform.plus.api.ChatService;
 import chat.platform.plus.api.dto.*;
 import chat.platform.plus.api.response.Response;
-import chat.platform.plus.domain.chat.model.entity.HistoryCodeEntity;
-import chat.platform.plus.domain.chat.model.entity.MessageEntity;
-import chat.platform.plus.domain.chat.model.entity.UpLoadFileResEntity;
-import chat.platform.plus.domain.chat.model.entity.UploadFileEntity;
+import chat.platform.plus.domain.chat.model.entity.*;
+import chat.platform.plus.domain.chat.model.valobj.ImgFunctionEnum;
+import chat.platform.plus.domain.chat.model.valobj.MessageTypeEnum;
+import chat.platform.plus.domain.chat.model.valobj.ImgSizeEnum;
+import chat.platform.plus.domain.chat.model.valobj.VidFunctionEnum;
 import chat.platform.plus.domain.chat.service.LLMService;
+import chat.platform.plus.domain.chat.service.create.img.CreateImgService;
+import chat.platform.plus.domain.chat.service.create.vid.CreateVidService;
+import chat.platform.plus.types.common.File;
 import chat.platform.plus.types.enums.CommonEnum;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
@@ -20,6 +24,7 @@ import qwen.sdk.largemodel.chat.model.ChatRequest;
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @CrossOrigin
@@ -30,6 +35,12 @@ public class ChatController implements ChatService {
 
     @Resource
     private LLMService llmService;
+
+    @Resource
+    private Map<String, CreateImgService> createImgServiceMap;
+
+    @Resource
+    private Map<String, CreateVidService> createVidServiceMap;
 
     @Resource
     private ResponseBodyEmitter responseBodyEmitter;
@@ -122,6 +133,93 @@ public class ChatController implements ChatService {
                 .build();
     }
 
+    @PostMapping("/create/img")
+    @Override
+    public Response<CreateResDTO> createImg(@RequestBody CreateImgReqDTO createImgReqDTO) throws Exception {
+        // 参数校验
+        if (StringUtils.isBlank(createImgReqDTO.getHistoryCode()) || StringUtils.isBlank(createImgReqDTO.getContent()) ||
+                createImgReqDTO.getMessageType() == null || createImgReqDTO.getFunctionType() == null ||
+                createImgReqDTO.getSizeType() == null) {
+            return Response.<CreateResDTO>builder()
+                    .code(CommonEnum.LACK_PARAM.getCode())
+                    .info(CommonEnum.LACK_PARAM.getInfo())
+                    .build();
+        }
+        String function = ImgFunctionEnum.getFunction(createImgReqDTO.getFunctionType());
+        String size = ImgSizeEnum.getSize(createImgReqDTO.getSizeType());
+        if (function == null || size == null || !createImgReqDTO.getMessageType().equals(MessageTypeEnum.CREATE_IMAGE.getType())) {
+            return Response.<CreateResDTO>builder()
+                    .code(CommonEnum.ILLEGAL.getCode())
+                    .info(CommonEnum.ILLEGAL.getInfo())
+                    .build();
+        }
+        // 根据功能获取对应服务
+        CreateImgService createImgService = createImgServiceMap.get(function);
+        CreateImgEntity createImgEntity = CreateImgEntity.builder()
+                .userId(StpUtil.getLoginIdAsString())
+                .historyCode(createImgReqDTO.getHistoryCode())
+                .content(createImgReqDTO.getContent())
+                .messageType(createImgReqDTO.getMessageType())
+                .imgFunction(function)
+                .size(size)
+                .fileList(createImgReqDTO.getFileList())
+                .fileListSize(createImgReqDTO.getFileListSize())
+                .build();
+        CreateEntity createEntity = createImgService.createImg(createImgEntity);
+        return Response.<CreateResDTO>builder()
+                .code(CommonEnum.SUCCESS.getCode())
+                .data(CreateResDTO.builder()
+                        .userId(createImgEntity.getUserId())
+                        .isSuccess(createEntity.getIsSuccess())
+                        .type(createEntity.getType())
+                        .url(createEntity.getUrl())
+                        .message(createEntity.getMessage())
+                        .build())
+                .info(CommonEnum.SUCCESS.getInfo())
+                .build();
+    }
 
+    @PostMapping("/create/vid")
+    @Override
+    public Response<CreateResDTO> createVid(@RequestBody CreateVidReqDTO createVidReqDTO) throws Exception {
+        // 参数校验
+        if (StringUtils.isBlank(createVidReqDTO.getHistoryCode()) || StringUtils.isBlank(createVidReqDTO.getContent()) ||
+                createVidReqDTO.getVidFunction() == null || createVidReqDTO.getMessageType() == null) {
+            return Response.<CreateResDTO>builder()
+                    .code(CommonEnum.LACK_PARAM.getCode())
+                    .info(CommonEnum.LACK_PARAM.getInfo())
+                    .build();
+        }
+        String function = VidFunctionEnum.getFunction(createVidReqDTO.getVidFunction());
+        if (function == null || !createVidReqDTO.getMessageType().equals(MessageTypeEnum.CREATE_VIDEO.getType())) {
+            return Response.<CreateResDTO>builder()
+                    .code(CommonEnum.ILLEGAL.getCode())
+                    .info(CommonEnum.ILLEGAL.getInfo())
+                    .build();
+        }
+        // 根据功能获取对应服务
+        CreateVidService createVidService = createVidServiceMap.get(function);
+        CreateVidEntity createVidEntity = CreateVidEntity.builder()
+                .userId(StpUtil.getLoginIdAsString())
+                .historyCode(createVidReqDTO.getHistoryCode())
+                .content(createVidReqDTO.getContent())
+                .messageType(createVidReqDTO.getMessageType())
+                .fileList(createVidReqDTO.getFileList())
+                .fileListSize(createVidReqDTO.getFileListSize())
+                .vidFunction(function)
+                .build();
+        CreateEntity createEntity = createVidService.createVid(createVidEntity);
+        return Response.<CreateResDTO>builder()
+                .code(CommonEnum.SUCCESS.getCode())
+                .data(CreateResDTO.builder()
+                        .userId(createVidEntity.getUserId())
+                        .isSuccess(createEntity.getIsSuccess())
+                        .type(createEntity.getType())
+                        .url(createEntity.getUrl())
+                        .message(createEntity.getMessage())
+                        .build())
+                .info(CommonEnum.SUCCESS.getInfo())
+                .build();
+    }
 
 }

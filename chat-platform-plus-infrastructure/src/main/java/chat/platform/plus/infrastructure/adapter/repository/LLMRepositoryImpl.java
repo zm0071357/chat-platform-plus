@@ -109,12 +109,16 @@ public class LLMRepositoryImpl implements LLMRepository {
                     .requestJson(JSON.toJSONString(requestMessages))
                     .build());
             return HistoryEntity.builder()
+                    .userId(userId)
+                    .historyCode(historyCode)
                     .historyMessages(historyMessages)
                     .requestMessages(requestMessages)
                     .build();
         }
         log.info("获取历史记录：{}", userId);
         return HistoryEntity.builder()
+                .userId(userId)
+                .historyCode(historyCode)
                 .historyMessages(JSON.parseArray(history.getHistoryJson(), ChatRequest.Input.Message.class))
                 .requestMessages(JSON.parseArray(history.getRequestJson(), ChatRequest.Input.Message.class))
                 .build();
@@ -133,4 +137,16 @@ public class LLMRepositoryImpl implements LLMRepository {
         }
         return list;
     }
+
+    @Override
+    public void updateHistory(HistoryEntity historyEntity) {
+        History history = History.builder()
+                .userId(historyEntity.getUserId())
+                .historyCode(historyEntity.getHistoryCode())
+                .historyJson(JSON.toJSONString(historyEntity.getHistoryMessages()))
+                .requestJson(JSON.toJSONString(historyEntity.getRequestMessages()))
+                .build();
+        historyDao.update(history);
+    }
+
 }

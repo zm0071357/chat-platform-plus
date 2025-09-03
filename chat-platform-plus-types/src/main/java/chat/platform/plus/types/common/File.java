@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class File {
+
     /**
      * 文件URL
      */
@@ -16,4 +17,5 @@ public class File {
      * 文件类型
      */
     private Integer type;
+
 }

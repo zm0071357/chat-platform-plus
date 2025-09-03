@@ -46,4 +46,10 @@ public interface LLMRepository {
      * @return
      */
     List<HistoryCodeEntity> getHistoryCodeList(String userId);
+
+    /**
+     * 更新历史记录
+     * @param historyEntity
+     */
+    void updateHistory(HistoryEntity historyEntity);
 }

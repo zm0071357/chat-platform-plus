@@ -1,4 +1,4 @@
-package chat.platform.plus.types.design.framework.link;
+package chat.platform.plus.types.design.framework.link.singleton;
 
 /**
  * 定义责任链的装配方法，解耦链的构建逻辑

@@ -1,4 +1,4 @@
-package chat.platform.plus.api.dto;
+package chat.platform.plus.domain.chat.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,18 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 创作通用响应体
+ * 创作实体
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateResDTO {
-
-    /**
-     * 用户ID
-     */
-    private String userId;
+public class CreateEntity {
 
     /**
      * 是否成功
@@ -40,5 +35,6 @@ public class CreateResDTO {
      * 文本信息
      */
     private String message;
+
 
 }

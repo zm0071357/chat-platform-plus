@@ -5,9 +5,9 @@ import chat.platform.plus.domain.chat.model.entity.HandleEntity;
 import chat.platform.plus.domain.chat.model.entity.CheckEntity;
 import chat.platform.plus.domain.chat.model.valobj.MessageConstant;
 import chat.platform.plus.domain.chat.model.valobj.ResultConstant;
-import chat.platform.plus.domain.chat.service.invoke.factory.DefaultLLMFactory;
+import chat.platform.plus.domain.chat.service.invoke.factory.DefaultLinkFactory;
 import chat.platform.plus.types.common.File;
-import chat.platform.plus.types.design.framework.link.AbstractLogicLink;
+import chat.platform.plus.types.design.framework.link.multition.handler.LogicHandler;
 import chat.platform.plus.types.enums.FileTypeEnum;
 import chat.platform.plus.types.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +22,13 @@ import java.util.Set;
  */
 @Slf4j
 @Service
-public class LLMFilter extends AbstractLogicLink<CheckEntity, DefaultLLMFactory.DynamicContext, HandleEntity> {
+public class LLMFilter implements LogicHandler<CheckEntity, DefaultLinkFactory.DynamicContext, HandleEntity> {
 
     @Resource
     private FileUtil fileUtil;
 
     @Override
-    public HandleEntity apply(CheckEntity checkEntity, DefaultLLMFactory.DynamicContext dynamicContext) throws Exception {
+    public HandleEntity apply(CheckEntity checkEntity, DefaultLinkFactory.DynamicContext dynamicContext) throws Exception {
         log.info("进入大模型过滤节点：{}", checkEntity.getUserId());
         // 联网搜索
         if (checkEntity.getIsSearch() && checkEntity.getFileList() != null && !checkEntity.getFileList().isEmpty()) {
@@ -63,7 +63,7 @@ public class LLMFilter extends AbstractLogicLink<CheckEntity, DefaultLLMFactory.
                         .build();
             }
         }
-        log.info("大模型过滤节点，退出责任链，结束：{}", checkEntity.getUserId());
+        log.info("大模型过滤节点，责任链执行完成：{}", checkEntity.getUserId());
         return HandleEntity.builder()
                 .isSuccess(true)
                 .message(MessageConstant.Success)

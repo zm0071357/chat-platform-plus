@@ -6,13 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 创作通用响应体
+ * 用户信息响应体
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateResDTO {
+public class UserInfoResDTO {
 
     /**
      * 用户ID
@@ -20,25 +20,12 @@ public class CreateResDTO {
     private String userId;
 
     /**
-     * 是否成功
+     * 用户名
      */
-    private Boolean isSuccess;
+    private String userName;
 
     /**
-     * 创作类型
-     * 1 图片
-     * 2 视频
+     * 用户绑定邮箱
      */
-    private Integer type;
-
-    /**
-     * URL
-     */
-    private String url;
-
-    /**
-     * 文本信息
-     */
-    private String message;
-
+    private String userEmail;
 }

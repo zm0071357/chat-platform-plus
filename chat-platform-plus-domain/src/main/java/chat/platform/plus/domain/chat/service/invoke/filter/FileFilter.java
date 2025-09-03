@@ -4,10 +4,8 @@ import chat.platform.plus.domain.chat.model.entity.HandleEntity;
 import chat.platform.plus.domain.chat.model.entity.CheckEntity;
 import chat.platform.plus.domain.chat.model.valobj.FilterEnum;
 import chat.platform.plus.domain.chat.model.valobj.MessageConstant;
-import chat.platform.plus.domain.chat.service.invoke.factory.DefaultLLMFactory;
-import chat.platform.plus.types.design.framework.link.AbstractLogicLink;
-import chat.platform.plus.types.utils.FileUtil;
-import jakarta.annotation.Resource;
+import chat.platform.plus.domain.chat.service.invoke.factory.DefaultLinkFactory;
+import chat.platform.plus.types.design.framework.link.multition.handler.LogicHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +16,14 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class FileFilter extends AbstractLogicLink<CheckEntity, DefaultLLMFactory.DynamicContext, HandleEntity> {
-
-    @Resource
-    private FileUtil fileUtil;
+public class FileFilter implements LogicHandler<CheckEntity, DefaultLinkFactory.DynamicContext, HandleEntity> {
 
     @Override
-    public HandleEntity apply(CheckEntity checkEntity, DefaultLLMFactory.DynamicContext dynamicContext) throws Exception {
+    public HandleEntity apply(CheckEntity checkEntity, DefaultLinkFactory.DynamicContext dynamicContext) throws Exception {
         log.info("进入文件过滤节点：{}", checkEntity.getUserId());
         // 上传文件体积
-        if ((dynamicContext.getFile() != null && dynamicContext.getFile().getSize() > 200 * 1024 * 1024) ||
-                (checkEntity.getFileListSize() != null && checkEntity.getFileListSize() > 200 * 1024 * 1024)) {
+        if ((checkEntity.getFile() != null && checkEntity.getFile().getSize() > 5 * 1024 * 1024) ||
+                (checkEntity.getFileListSize() != null && checkEntity.getFileListSize() > 5 * 1024 * 1024)) {
             log.info("文件过滤节点，文件体积太大，结束：{}", checkEntity.getUserId());
             return HandleEntity.builder()
                     .isSuccess(false)
@@ -37,7 +32,7 @@ public class FileFilter extends AbstractLogicLink<CheckEntity, DefaultLLMFactory
         }
         // 是否在此结束
         if (dynamicContext.getEndFilter() != null && dynamicContext.getEndFilter().equals(FilterEnum.FILE.getPlace())) {
-            log.info("文件过滤节点，退出责任链：{}", checkEntity.getUserId());
+            log.info("文件过滤节点，责任链执行完成：{}", checkEntity.getUserId());
             return HandleEntity.builder()
                     .isSuccess(true)
                     .message(MessageConstant.Success)

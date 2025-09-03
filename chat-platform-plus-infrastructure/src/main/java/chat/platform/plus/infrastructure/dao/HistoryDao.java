@@ -15,4 +15,5 @@ public interface HistoryDao {
     void update(History history);
 
     List<String> getHistoryCodeList(String userId);
+
 }

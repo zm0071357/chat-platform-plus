@@ -1,4 +1,4 @@
-package chat.platform.plus.types.design.framework.link;
+package chat.platform.plus.types.design.framework.link.singleton;
 
 /**
  * 抽象类 - 封装添加节点和执行 next 下一个节点的方法

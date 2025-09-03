@@ -39,14 +39,14 @@ public class QwenConfig {
     @Bean(name = "imageService")
     @ConditionalOnProperty(value = "qwen.sdk.config.enable", havingValue = "true", matchIfMissing = false)
     public ImageServiceImpl imageService(ModelFactory modelFactory) {
-        log.info("生成图像服务装配完成");
+        log.info("图片创作服务装配完成");
         return modelFactory.imageService();
     }
 
     @Bean(name = "videoService")
     @ConditionalOnProperty(value = "qwen.sdk.config.enable", havingValue = "true", matchIfMissing = false)
     public VideoServiceImpl videoService(ModelFactory modelFactory) {
-        log.info("生成视频服务装配完成");
+        log.info("视频创作服务装配完成");
         return modelFactory.videoService();
     }
 

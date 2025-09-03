@@ -13,7 +13,7 @@
     </resultMap>
 
     <select id="getHistory" resultMap="dataMap">
-        select history_json
+        select history_json,request_json
         from history
         where user_id = #{userId} and history_code = #{historyCode}
     </select>

@@ -40,7 +40,7 @@ public class AliOSSUtil {
         OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
         ossClient.putObject(bucketName, fileName, inputStream);
         // 文件访问路径
-        String url = endpoint.split("//")[0] + "//" + bucketName + "." + endpoint.split("//")[1] + "/" + fileName;
+        String url = "https://" + bucketName + "." + endpoint.substring(endpoint.lastIndexOf("/")+1) + "/" + fileName;
         // 关闭OSS客户端
         ossClient.shutdown();
         return url;

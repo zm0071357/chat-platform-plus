@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * 上传文件请求体
  */
-@Getter
+@Data
 public class UpLoadFileReqDTO {
 
     /**

@@ -16,6 +16,7 @@
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
     </resultMap>
 
+
     <!-- 通过账号获取用户 -->
     <select id="getUserByUserId" resultMap="UserResultMap">
         SELECT id, user_id, user_name, user_email, is_black, is_vip, count, password, create_time, update_time

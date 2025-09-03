@@ -37,4 +37,19 @@ public interface ChatService {
       * @return
       */
      Response<List<ChatRequest.Input.Message>> getHistory(String historyCode);
+
+     /**
+      * 图片创作
+      * @param createImgReqDTO
+      * @return
+      */
+     Response<CreateResDTO> createImg(CreateImgReqDTO createImgReqDTO) throws Exception;
+
+     /**
+      * 视频创作
+      * @param createVidReqDTO
+      * @return
+      */
+     Response<CreateResDTO> createVid(CreateVidReqDTO createVidReqDTO) throws Exception;
+
 }
