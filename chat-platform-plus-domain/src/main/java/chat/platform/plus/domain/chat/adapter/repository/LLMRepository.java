@@ -52,4 +52,12 @@ public interface LLMRepository {
      * @param historyEntity
      */
     void updateHistory(HistoryEntity historyEntity);
+
+    /**
+     * 删除历史记录
+     * @param userId
+     * @param historyCode
+     * @return
+     */
+    DeleteHistoryResEntity deleteHistory(String userId, String historyCode);
 }

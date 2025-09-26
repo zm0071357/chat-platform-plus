@@ -16,4 +16,7 @@ public interface HistoryDao {
 
     List<String> getHistoryCodeList(String userId);
 
+    void ragUpdate(History history);
+
+    int delete(String userId, String historyCode);
 }

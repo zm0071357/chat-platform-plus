@@ -30,9 +30,6 @@ public class LoginRepositoryImpl implements LoginRepository {
     @Resource
     private JavaMailUtil javaMailUtil;
 
-    @Resource
-    private AgronUtil agronUtil;
-
     @Override
     public LoginResEntity loginByPW(LoginByPWEntity loginByPWEntity) {
         User existUser = userDao.getUserByUserId(loginByPWEntity.getUserId());
@@ -44,7 +41,7 @@ public class LoginRepositoryImpl implements LoginRepository {
                     .build();
         }
         // 密码不正确
-        if (!agronUtil.verifyPassword(existUser.getPassword(), loginByPWEntity.getPassword())) {
+        if (!AgronUtil.verifyPassword(existUser.getPassword(), loginByPWEntity.getPassword())) {
             return LoginResEntity.builder()
                     .isSuccess(false)
                     .message(LoginConstant.Fail)
@@ -107,7 +104,7 @@ public class LoginRepositoryImpl implements LoginRepository {
         User newUser = User.builder()
                 .userId(userId)
                 .userName(userId)
-                .password(agronUtil.hashPassword(password))
+                .password(AgronUtil.hashPassword(password))
                 .userEmail(loginByVCEntity.getUserEmail())
                 .build();
         int insert = userDao.insert(newUser);

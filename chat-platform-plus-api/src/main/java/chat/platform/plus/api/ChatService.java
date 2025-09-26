@@ -52,4 +52,11 @@ public interface ChatService {
       */
      Response<CreateResDTO> createVid(CreateVidReqDTO createVidReqDTO) throws Exception;
 
+     /**
+      * 删除历史记录
+      * @param historyCode
+      * @return
+      */
+     Response<DeleteHistoryResDTO> deleteHistory(String historyCode);
+
 }

@@ -4,14 +4,10 @@ import chat.platform.plus.api.ChatService;
 import chat.platform.plus.api.dto.*;
 import chat.platform.plus.api.response.Response;
 import chat.platform.plus.domain.chat.model.entity.*;
-import chat.platform.plus.domain.chat.model.valobj.ImgFunctionEnum;
-import chat.platform.plus.domain.chat.model.valobj.MessageTypeEnum;
-import chat.platform.plus.domain.chat.model.valobj.ImgSizeEnum;
-import chat.platform.plus.domain.chat.model.valobj.VidFunctionEnum;
+import chat.platform.plus.domain.chat.model.valobj.*;
 import chat.platform.plus.domain.chat.service.LLMService;
 import chat.platform.plus.domain.chat.service.create.img.CreateImgService;
 import chat.platform.plus.domain.chat.service.create.vid.CreateVidService;
-import chat.platform.plus.types.common.File;
 import chat.platform.plus.types.enums.CommonEnum;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
@@ -42,16 +38,20 @@ public class ChatController implements ChatService {
     @Resource
     private Map<String, CreateVidService> createVidServiceMap;
 
-    @Resource
-    private ResponseBodyEmitter responseBodyEmitter;
-
     @PostMapping("/chat")
     @Override
     public ResponseBodyEmitter chat(@RequestBody ChatReqDTO chatReqDTO) throws Exception {
+        ResponseBodyEmitter responseBodyEmitter = new ResponseBodyEmitter(10 * 60 * 1000L);
         // 参数校验
-        if (StringUtils.isBlank(chatReqDTO.getHistoryCode()) || StringUtils.isBlank(chatReqDTO.getContent())
-                || chatReqDTO.getIsSearch() == null || chatReqDTO.getMessageType() == null) {
-            return responseBodyEmitter;
+        if (StringUtils.isBlank(chatReqDTO.getContent()) || chatReqDTO.getHistoryCode() == null ||
+                chatReqDTO.getIsSearch() == null || chatReqDTO.getMessageType() == null) {
+            return llmService.fail(ResultConstant.Fail_Lack_Param, responseBodyEmitter);
+        }
+        boolean fileList = false;
+        boolean fileListSize = false;
+        if (chatReqDTO.getUploadFile() != null) {
+            fileList = (chatReqDTO.getUploadFile().getFileList() != null);
+            fileListSize = (chatReqDTO.getUploadFile().getFileListSize() != null);
         }
         MessageEntity messageEntity = MessageEntity.builder()
                 .userId(StpUtil.getLoginIdAsString())
@@ -59,8 +59,8 @@ public class ChatController implements ChatService {
                 .content(chatReqDTO.getContent())
                 .messageType(chatReqDTO.getMessageType())
                 .isSearch(chatReqDTO.getIsSearch())
-                .fileList(chatReqDTO.getUploadFile().getFileList())
-                .fileListSize(chatReqDTO.getUploadFile().getFileListSize())
+                .fileList(fileList ? chatReqDTO.getUploadFile().getFileList() : null)
+                .fileListSize(fileListSize ? chatReqDTO.getUploadFile().getFileListSize() : null)
                 .build();
         return llmService.chat(messageEntity, responseBodyEmitter);
     }
@@ -138,16 +138,20 @@ public class ChatController implements ChatService {
     public Response<CreateResDTO> createImg(@RequestBody CreateImgReqDTO createImgReqDTO) throws Exception {
         // 参数校验
         if (StringUtils.isBlank(createImgReqDTO.getHistoryCode()) || StringUtils.isBlank(createImgReqDTO.getContent()) ||
-                createImgReqDTO.getMessageType() == null || createImgReqDTO.getFunctionType() == null ||
-                createImgReqDTO.getSizeType() == null) {
+                createImgReqDTO.getMessageType() == null || createImgReqDTO.getFunctionType() == null) {
             return Response.<CreateResDTO>builder()
                     .code(CommonEnum.LACK_PARAM.getCode())
                     .info(CommonEnum.LACK_PARAM.getInfo())
                     .build();
         }
         String function = ImgFunctionEnum.getFunction(createImgReqDTO.getFunctionType());
-        String size = ImgSizeEnum.getSize(createImgReqDTO.getSizeType());
-        if (function == null || size == null || !createImgReqDTO.getMessageType().equals(MessageTypeEnum.CREATE_IMAGE.getType())) {
+        String size = null;
+        if (createImgReqDTO.getSizeType() != null) {
+            size = ImgSizeEnum.getSize(createImgReqDTO.getSizeType());
+        }
+        if (function == null || !createImgReqDTO.getMessageType().equals(MessageTypeEnum.CREATE_IMAGE.getType()) ||
+                (function.equals(ImgFunctionEnum.CREATE_IMAGE.getFunction()) && size == null) ||
+                (!function.equals(ImgFunctionEnum.CREATE_IMAGE.getFunction()) && size != null)) {
             return Response.<CreateResDTO>builder()
                     .code(CommonEnum.ILLEGAL.getCode())
                     .info(CommonEnum.ILLEGAL.getInfo())
@@ -217,6 +221,26 @@ public class ChatController implements ChatService {
                         .type(createEntity.getType())
                         .url(createEntity.getUrl())
                         .message(createEntity.getMessage())
+                        .build())
+                .info(CommonEnum.SUCCESS.getInfo())
+                .build();
+    }
+
+    @PostMapping("/delete/history/{historyCode}")
+    @Override
+    public Response<DeleteHistoryResDTO> deleteHistory(@PathVariable("historyCode") String historyCode) {
+        if (StringUtils.isBlank(historyCode)) {
+            Response.<DeleteHistoryResDTO>builder()
+                    .code(CommonEnum.LACK_PARAM.getCode())
+                    .info(CommonEnum.LACK_PARAM.getInfo())
+                    .build();
+        }
+        DeleteHistoryResEntity deleteHistoryResEntity = llmService.deleteHistory(StpUtil.getLoginIdAsString(), historyCode);
+        return Response.<DeleteHistoryResDTO>builder()
+                .code(CommonEnum.SUCCESS.getCode())
+                .data(DeleteHistoryResDTO.builder()
+                        .isSuccess(deleteHistoryResEntity.getIsSuccess())
+                        .message(deleteHistoryResEntity.getMessage())
                         .build())
                 .info(CommonEnum.SUCCESS.getInfo())
                 .build();

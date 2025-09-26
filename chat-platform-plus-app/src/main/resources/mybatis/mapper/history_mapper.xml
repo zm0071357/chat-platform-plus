@@ -47,4 +47,19 @@
           and history_code = #{historyCode}
     </update>
 
+    <update id="ragUpdate" parameterType="chat.platform.plus.infrastructure.dao.po.History">
+        update history
+        set
+            history_json = #{historyJson},
+            update_time = now()
+        where
+            user_id = #{userId}
+          and history_code = #{historyCode}
+    </update>
+
+    <delete id="delete">
+        delete from history
+        where user_id = #{userId} and history_code = #{historyCode}
+    </delete>
+
 </mapper>

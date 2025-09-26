@@ -28,7 +28,6 @@ public class DCCFilter implements LogicHandler<CheckEntity, DefaultLinkFactory.D
         // 服务降级拦截
         if (llmRepository.downgradeSwitch()) {
             log.info("DCC过滤节点，服务降级拦截，结束:{}", checkEntity.getUserId());
-            //TODO: 在此抛出异常
             return HandleEntity.builder()
                     .isSuccess(false)
                     .build();
@@ -37,7 +36,6 @@ public class DCCFilter implements LogicHandler<CheckEntity, DefaultLinkFactory.D
         UserEntity userEntity = llmRepository.getUserByUserId(checkEntity.getUserId());
         if (userEntity == null) {
             log.info("DCC过滤节点，用户为空，结束：{}", checkEntity.getUserId());
-            //TODO: 在此抛出异常
             return HandleEntity.builder()
                     .isSuccess(false)
                     .message(MessageConstant.Fail_IllegalParam)
@@ -46,7 +44,6 @@ public class DCCFilter implements LogicHandler<CheckEntity, DefaultLinkFactory.D
         // 切量拦截
         if (!llmRepository.cutRange(userEntity.getUserId())) {
             log.info("DCC过滤节点，切量拦截，结束：{}", checkEntity.getUserId());
-            //TODO: 在此抛出异常
             return HandleEntity.builder()
                     .isSuccess(false)
                     .build();

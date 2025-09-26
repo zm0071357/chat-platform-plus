@@ -44,7 +44,8 @@ public class CreateImgFilter implements LogicHandler<CheckEntity, DefaultLinkFac
                     .build();
         }
         // 文件类型校验
-        if (!dynamicContext.getImgFunction().equals(ImgFunctionEnum.CREATE_IMAGE.getFunction()) && !fileUtil.getFileTypeByStr(checkEntity.getFileList().get(0).getUrl()).equals(FileTypeEnum.IMAGE.getType())) {
+        if (!dynamicContext.getImgFunction().equals(ImgFunctionEnum.CREATE_IMAGE.getFunction()) &&
+                !fileUtil.getFileTypeByStr(checkEntity.getFileList().get(0).getUrl()).equals(FileTypeEnum.IMAGE.getType())) {
             log.info("图片创作请求过滤节点，文件类型错误，结束：{}", checkEntity.getUserId());
             return HandleEntity.builder()
                     .isSuccess(false)

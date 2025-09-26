@@ -1,9 +1,6 @@
 package chat.platform.plus.domain.chat.service;
 
-import chat.platform.plus.domain.chat.model.entity.HistoryCodeEntity;
-import chat.platform.plus.domain.chat.model.entity.MessageEntity;
-import chat.platform.plus.domain.chat.model.entity.UpLoadFileResEntity;
-import chat.platform.plus.domain.chat.model.entity.UploadFileEntity;
+import chat.platform.plus.domain.chat.model.entity.*;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import qwen.sdk.largemodel.chat.model.ChatRequest;
 
@@ -41,7 +38,19 @@ public interface LLMService {
      */
     List<ChatRequest.Input.Message> getHistory(String userId, String historyCode);
 
+    /**
+     * 返回失败信息
+     * @param result
+     * @param responseBodyEmitter
+     * @return
+     */
+    ResponseBodyEmitter fail(String result, ResponseBodyEmitter responseBodyEmitter);
 
-    
-
+    /**
+     * 删除历史记录
+     * @param userId
+     * @param historyCode
+     * @return
+     */
+    DeleteHistoryResEntity deleteHistory(String userId, String historyCode);
 }

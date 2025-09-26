@@ -33,9 +33,6 @@ public class LLMRepositoryImpl implements LLMRepository {
     private DCCServiceImpl dccServiceImpl;
 
     @Resource
-    private AliOSSUtil aliOSSUtil;
-
-    @Resource
     private FileUtil fileUtil;
 
     @Resource
@@ -68,7 +65,8 @@ public class LLMRepositoryImpl implements LLMRepository {
     @Override
     public UpLoadFileResEntity uploadFile(UploadFileEntity uploadFileEntity) {
         try {
-            String url = aliOSSUtil.upload(uploadFileEntity.getFile());
+            log.info("开始上传文件：{}", uploadFileEntity.getFile().getOriginalFilename());
+            String url = AliOSSUtil.upload(uploadFileEntity.getFile());
             Long size = uploadFileEntity.getFile().getSize();
             Integer fileType = fileUtil.getFileTypeByMult(uploadFileEntity.getFile());
             return UpLoadFileResEntity.builder()
@@ -90,8 +88,18 @@ public class LLMRepositoryImpl implements LLMRepository {
 
     @Override
     public HistoryEntity getHistory(String userId, String historyCode) {
-        History history = historyDao.getHistory(userId, historyCode);
-        if (history == null) {
+        // 新对话
+        if (historyCode.equals("")) {
+            // 生成新编号
+            List<String> historyCodeList = historyDao.getHistoryCodeList(userId);
+            int maxNumber = 0;
+            for (String code : historyCodeList) {
+                int num = Integer.parseInt(code.substring(userId.length() + 1));
+                maxNumber = Math.max(num, maxNumber);
+            }
+            int newNumber = maxNumber + 1;
+            String sizeCode = newNumber < 10 ? "0" + newNumber : Integer.toString(newNumber);
+            historyCode = userId + "_" + sizeCode;
             log.info("创建历史记录：{}", userId);
             List<ChatRequest.Input.Message> historyMessages = new ArrayList<>();
             List<ChatRequest.Input.Message> requestMessages = new ArrayList<>();
@@ -115,6 +123,7 @@ public class LLMRepositoryImpl implements LLMRepository {
                     .requestMessages(requestMessages)
                     .build();
         }
+        History history = historyDao.getHistory(userId, historyCode);
         log.info("获取历史记录：{}", userId);
         return HistoryEntity.builder()
                 .userId(userId)
@@ -129,9 +138,9 @@ public class LLMRepositoryImpl implements LLMRepository {
         List<String> historyCodeList = historyDao.getHistoryCodeList(userId);
         List<HistoryCodeEntity> list = new ArrayList<>();
         for (String historyCode : historyCodeList) {
-            int count = 1;
+            String[] count = historyCode.split("_");
             list.add(HistoryCodeEntity.builder()
-                            .historyName("历史记录" + count++)
+                            .historyName("历史记录" + count[1])
                             .historyCode(historyCode)
                     .build());
         }
@@ -147,6 +156,15 @@ public class LLMRepositoryImpl implements LLMRepository {
                 .requestJson(JSON.toJSONString(historyEntity.getRequestMessages()))
                 .build();
         historyDao.update(history);
+    }
+
+    @Override
+    public DeleteHistoryResEntity deleteHistory(String userId, String historyCode) {
+        int deleteCount = historyDao.delete(userId, historyCode);
+        return DeleteHistoryResEntity.builder()
+                .isSuccess(deleteCount > 0)
+                .message(deleteCount > 0 ? MessageConstant.Success : MessageConstant.Fail_History_NoExist)
+                .build();
     }
 
 }

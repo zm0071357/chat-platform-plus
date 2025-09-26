@@ -47,11 +47,11 @@ public class LLMFilter implements LogicHandler<CheckEntity, DefaultLinkFactory.D
                     log.info("大模型过滤节点，文件类型错误，结束：{}", checkEntity.getUserId());
                     return HandleEntity.builder()
                             .isSuccess(false)
+                            .result(ResultConstant.Fail_File_Type)
                             .message(MessageConstant.Fail_File_Type)
                             .build();
                 }
                 typeSet.add(file.getType());
-
             }
             // 多模态限制
             if (typeSet.size() > 2 && typeSet.containsAll(FileTypeEnum.getMultiType())) {

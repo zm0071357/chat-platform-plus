@@ -22,7 +22,7 @@ public class ChatReqDTO {
     private String content;
 
     /**
-     * 消息类型 默认为1
+     * 消息类型 1
      */
     private Integer messageType;
 

@@ -88,4 +88,14 @@ public class LLMServiceImpl implements LLMService {
         return historyEntity.getHistoryMessages();
     }
 
+    @Override
+    public ResponseBodyEmitter fail(String result, ResponseBodyEmitter responseBodyEmitter) {
+        return llmPort.fail(result, responseBodyEmitter);
+    }
+
+    @Override
+    public DeleteHistoryResEntity deleteHistory(String userId, String historyCode) {
+        return llmRepository.deleteHistory(userId, historyCode);
+    }
+
 }

@@ -15,6 +15,10 @@ public class MessageConstant {
     public static final String Fail_Vid_Refer_Count = "处理失败，需要提供参考图";
     public static final String Fail_Vid_Refers_Count = "处理失败，参考图数量只允许为";
     public static final String Success = "处理成功";
+    public static final String Fail_History_NoExist = "处理失败，不存在的历史记录";
+    public static final String Fail_KnowledgeList_NoExist = "处理失败，不存在的知识库标签列表";
+    public static final String Fail_Image = "生成图片失败";
+    public static final String Fail_Video = "生成视频失败";
 
 }
 

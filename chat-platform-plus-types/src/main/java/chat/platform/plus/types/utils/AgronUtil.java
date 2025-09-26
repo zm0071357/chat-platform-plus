@@ -15,7 +15,7 @@ public class AgronUtil {
      * @param password
      * @return
      */
-    public String hashPassword(String password) {
+    public static String hashPassword(String password) {
         Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
         return argon2.hash(10, 65536, 1, password.toCharArray());
     }
@@ -26,7 +26,7 @@ public class AgronUtil {
      * @param password
      * @return
      */
-    public boolean verifyPassword(String hash, String password) {
+    public static boolean verifyPassword(String hash, String password) {
         Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
         return argon2.verify(hash, password.toCharArray());
     }

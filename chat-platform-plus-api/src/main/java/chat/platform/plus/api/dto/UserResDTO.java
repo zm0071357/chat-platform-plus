@@ -6,13 +6,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 用户信息响应体
+ * 用户响应体
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInfoResDTO {
+public class UserResDTO {
+
+    /**
+     * 是否成功
+     */
+    private Boolean isSuccess;
+
+    /**
+     * 信息
+     */
+    private String message;
 
     /**
      * 用户ID
@@ -28,4 +38,5 @@ public class UserInfoResDTO {
      * 用户绑定邮箱
      */
     private String userEmail;
+
 }

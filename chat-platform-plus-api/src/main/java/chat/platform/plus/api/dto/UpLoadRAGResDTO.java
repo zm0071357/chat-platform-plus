@@ -17,11 +17,6 @@ import java.util.List;
 public class UpLoadRAGResDTO {
 
     /**
-     * 用户ID
-     */
-    private String userId;
-
-    /**
      * 是否成功
      */
     private Boolean isSuccess;
@@ -37,32 +32,7 @@ public class UpLoadRAGResDTO {
     private String ragName;
 
     /**
-     * 文件详情
+     * 上传成功个数
      */
-    private List<File> file;
-
-    /**
-     * 文件详情类
-     */
-    @Data
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class File {
-
-        /**
-         * 文件URL
-         */
-        private String url;
-
-        /**
-         * 文件大小
-         */
-        private Long size;
-
-        /**
-         * 文件类型
-         */
-        private Integer fileType;
-    }
+    private Integer count;
 }

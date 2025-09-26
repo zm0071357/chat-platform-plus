@@ -43,14 +43,9 @@ public class LLMPortImpl implements LLMPort {
     @Resource
     private ChatServiceImpl chatServiceImpl;
 
-    @Resource
-    private ResponseBodyEmitter responseBodyEmitter;
-
     @Override
     public ResponseBodyEmitter chat(InvokeEntity invokeEntity, ResponseBodyEmitter responseBodyEmitter) {
-        if (invokeEntity.getMessageType().equals(MessageTypeEnum.RAG.getType())) {
-            return ragChat(invokeEntity, responseBodyEmitter);
-        } else if (invokeEntity.getMessageType().equals(MessageTypeEnum.TEXT.getType()) ) {
+        if (invokeEntity.getMessageType().equals(MessageTypeEnum.TEXT.getType()) ) {
             return commonChat(invokeEntity, responseBodyEmitter);
         } else if (invokeEntity.getMessageType().equals(MessageTypeEnum.TEXT_WITH_FILE.getType())) {
             return commonChatWithFile(invokeEntity, responseBodyEmitter);
@@ -171,15 +166,6 @@ public class LLMPortImpl implements LLMPort {
         log.info("请求参数:{}", JSON.toJSONString(request));
         return handle(responseBodyEmitter, invokeEntity.getUserId(), invokeEntity.getHistoryCode(),
                 request, invokeEntity.getHistoryMessages(), requestMessages);
-    }
-
-    /**
-     * RAG
-     * @param invokeEntity
-     * @return
-     */
-    private ResponseBodyEmitter ragChat(InvokeEntity invokeEntity, ResponseBodyEmitter responseBodyEmitter) {
-        return null;
     }
 
     /**

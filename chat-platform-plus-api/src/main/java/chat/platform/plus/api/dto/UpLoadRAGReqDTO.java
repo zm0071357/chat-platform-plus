@@ -1,6 +1,6 @@
 package chat.platform.plus.api.dto;
 
-import lombok.Getter;
+import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -8,18 +8,13 @@ import java.util.List;
 /**
  * 上传RAG知识库请求体
  */
-@Getter
+@Data
 public class UpLoadRAGReqDTO {
-
-    /**
-     * 用户ID
-     */
-    private String userId;
 
     /**
      * 文件
      */
-    private List<MultipartFile> file;
+    private List<MultipartFile> fileList;
 
     /**
      * 知识库名称

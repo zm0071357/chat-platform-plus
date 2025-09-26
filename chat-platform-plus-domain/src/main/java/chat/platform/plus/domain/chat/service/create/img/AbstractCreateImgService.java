@@ -53,7 +53,7 @@ public abstract class AbstractCreateImgService implements CreateImgService {
                 List<ChatRequest.Input.Message.Content> userContent = new ArrayList<>();
                 // 用户消息
                 userContent.add(ChatRequest.Input.Message.Content.builder()
-                        .text((createImgEntity.getImgFunction()) + createImgEntity.getContent() + "比例为：" + createImgEntity.getSize())
+                        .text(createImgEntity.getImgFunction() + "：" + createImgEntity.getContent())
                         .build());
                 if (!createImgEntity.getImgFunction().equals(ImgFunctionEnum.CREATE_IMAGE.getFunction())) {
                     userContent.add(ChatRequest.Input.Message.Content.builder()
@@ -76,6 +76,9 @@ public abstract class AbstractCreateImgService implements CreateImgService {
                 historyMessages.add(ChatRequest.Input.Message.builder()
                         .role(RoleEnum.ASSISTANT.getRole())
                         .content(systemContent)
+                        .build());
+                systemContent.add(ChatRequest.Input.Message.Content.builder()
+                        .text("按照要求为用户生成图片")
                         .build());
                 requestMessages.add(ChatRequest.Input.Message.builder()
                         .role(RoleEnum.ASSISTANT.getRole())
