@@ -28,7 +28,7 @@
         select history_code
         from history
         where user_id = #{userId}
-        order by update_time desc
+        payOrder by update_time desc
     </select>
 
     <insert id="insert" parameterType="chat.platform.plus.infrastructure.dao.po.History">

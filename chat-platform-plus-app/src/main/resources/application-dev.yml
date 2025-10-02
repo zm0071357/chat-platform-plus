@@ -21,12 +21,12 @@ spring:
     pgvector:
       username:
       password:
-      url: jdbc:postgresql:///ai-rag-knowledge
+      url:
       driver-class-name: org.postgresql.Driver
       hikari:
-        maximum-pool-size: 5
-        minimum-idle: 2
-        idle-timeout: 30000
+        maximum-pool-size: 25
+        minimum-idle: 15
+        idle-timeout: 180000
         connection-timeout: 30000
 
   ai:
@@ -36,6 +36,7 @@ spring:
         options:
           num-batch: 512
         model: nomic-embed-text
+
   # 邮件配置
   mail:
     host: smtp.qq.com
@@ -44,6 +45,7 @@ spring:
     username:
     password:
     application_name:
+
   # 上传文件大小限制
   servlet:
     multipart:
@@ -84,6 +86,7 @@ qwen:
       enable: true
       api-key:
 
+# 阿里云OSS配置
 aliyun:
   oss:
     endpoint:
@@ -91,6 +94,7 @@ aliyun:
     accessKeySecret:
     bucketName:
 
+# Satoken 配置
 sa-token:
   # token 名称（同时也是 cookie 名称）
   token-name: satoken
@@ -106,6 +110,18 @@ sa-token:
   token-style: uuid
   # 是否输出操作日志
   is-log: true
+
+github:
+  username:
+  token:
+
+ltzf:
+  sdk:
+    config:
+      app_id:      # 应用者ID
+      mch_id:   # 商户号
+      partner_key:    # 密钥
+      notify_url:
 
 # 日志
 logging:

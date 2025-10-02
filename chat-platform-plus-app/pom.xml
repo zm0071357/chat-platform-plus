@@ -89,6 +89,10 @@
         </dependency>
         <dependency>
             <groupId>top.xiaoming-programming</groupId>
+            <artifactId>ltzf-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>top.xiaoming-programming</groupId>
             <artifactId>chat-platform-plus-trigger</artifactId>
         </dependency>
         <dependency>

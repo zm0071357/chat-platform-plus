@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chat.platform.plus.infrastructure.dao.PayOrderDao">
+
+    <resultMap id="OrderResultMap" type="chat.platform.plus.infrastructure.dao.po.PayOrder">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="order_id" property="orderId"/>
+        <result column="order_create_time" property="orderCreateTime"/>
+        <result column="order_price" property="orderPrice"/>
+        <result column="status" property="status"/>
+        <result column="pay_url" property="payUrl"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="getUnpaidOrder" resultMap="OrderResultMap" parameterType="chat.platform.plus.infrastructure.dao.po.PayOrder">
+        select user_id, goods_id, order_id, order_create_time, order_price, pay_url, status
+        from pay_order
+        where user_id = #{userId} and goods_id = #{goodsId} and status = 2
+    </select>
+
+    <insert id="insert" parameterType="chat.platform.plus.infrastructure.dao.po.PayOrder">
+        insert into pay_order(
+            user_id, goods_id, order_id, order_create_time,
+            order_price, status, create_time, update_time)
+        values(
+                  #{userId}, #{goodsId},  #{orderId}, #{orderCreateTime},
+                  #{orderPrice}, #{status}, now(), now()
+              )
+    </insert>
+
+    <select id="getUnNotifyOrderIdList" resultType="java.lang.String">
+        <![CDATA[
+        select order_id
+        from pay_order
+        where status = 2 and now() >= order_create_time + interval 1 minute
+        order by id asc
+        limit 50
+        ]]>
+    </select>
+
+    <update id="updateOrderStatusPaySuccess" parameterType="chat.platform.plus.infrastructure.dao.po.PayOrder">
+        update pay_order
+        set pay_time = #{payTime}, status = 3, update_time = now()
+        where order_id = #{orderId}
+    </update>
+
+
+    <select id="getTimeOutOrderIdList" resultType="java.lang.String">
+        <![CDATA[
+        select order_id
+        from pay_order
+        where status = 2 and now() >= order_create_time + interval 10 minute
+        order by id asc
+        limit 50
+        ]]>
+    </select>
+
+    <update id="updateOrderStatusClose" parameterType="java.lang.String">
+        update pay_order
+        set status = 5, update_time = now()
+        where order_id = #{orderId}
+    </update>
+
+    <select id="getUnPaidOrder" resultMap="OrderResultMap">
+        select user_id, goods_id, order_id, order_create_time, order_price, pay_url, status
+        from pay_order
+        where order_id = #{orderId} and status = 2
+    </select>
+
+    <update id="updateOrderStatusPayWait" parameterType="chat.platform.plus.infrastructure.dao.po.PayOrder">
+        update pay_order
+        set status = 2, pay_url = #{payUrl}, update_time = now()
+        where order_id = #{orderId}
+    </update>
+
+</mapper>
