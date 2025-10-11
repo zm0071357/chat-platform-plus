@@ -1,6 +1,7 @@
 package chat.platform.plus.domain.trade.model.entity;
 
 import chat.platform.plus.domain.trade.model.valobj.OrderStatusEnum;
+import chat.platform.plus.domain.trade.model.valobj.OrderTypesEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,9 +46,24 @@ public class PrePayOrderEntity {
     private BigDecimal orderPrice;
 
     /**
+     * 订单优惠价格
+     */
+    private BigDecimal deductionPrice;
+
+    /**
+     * 订单最终支付价格
+     */
+    private BigDecimal payPrice;
+
+    /**
      * 订单状态枚举
      */
     private OrderStatusEnum orderStatusEnum;
+
+    /**
+     * 订单类型枚举
+     */
+    private OrderTypesEnum orderTypesEnum;
 
     /**
      * 生成订单ID

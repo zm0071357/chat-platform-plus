@@ -48,6 +48,21 @@ public class PayOrder {
     private BigDecimal orderPrice;
 
     /**
+     * 订单类型 1 直接购买、2 拼团购买
+     */
+    private Integer orderType;
+
+    /**
+     * 订单优惠价格
+     */
+    private BigDecimal deductionPrice;
+
+    /**
+     * 订单最终支付价格
+     */
+    private BigDecimal payPrice;
+
+    /**
      * 订单状态 1 创建完成、2 等待支付、3 支付成功、4 交易完成、5 订单关单
      */
     private Integer status;

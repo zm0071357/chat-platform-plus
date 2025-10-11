@@ -48,7 +48,7 @@ public class LLMRepositoryImpl implements LLMRepository {
                 .userId(user.getUserId())
                 .isBlack(user.getIsBlack())
                 .isVIP(user.getIsVip())
-                .count(user.getCount())
+                .invokeCount(user.getInvokeCount())
                 .build();
     }
 

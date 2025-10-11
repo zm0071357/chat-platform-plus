@@ -1,5 +1,6 @@
 package chat.platform.plus.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.ollama.OllamaChatClient;
 import org.springframework.ai.ollama.OllamaEmbeddingClient;
 import org.springframework.ai.ollama.api.OllamaApi;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+@Slf4j
 @Configuration
 public class OllamaChatClientConfig {
 
@@ -39,7 +41,7 @@ public class OllamaChatClientConfig {
     }
 
     @Bean
-    public PgVectorStore pgVectorStore(OllamaApi ollamaApi, @Qualifier("pgVectorJdbcTemplate")JdbcTemplate jdbcTemplate) {
+    public PgVectorStore pgVectorStore(OllamaApi ollamaApi, @Qualifier("pgVectorJdbcTemplate") JdbcTemplate jdbcTemplate) {
         OllamaEmbeddingClient embeddingClient = new OllamaEmbeddingClient(ollamaApi);
         embeddingClient.withDefaultOptions(OllamaOptions.create().withModel("nomic-embed-text"));
         return new PgVectorStore(jdbcTemplate, embeddingClient);

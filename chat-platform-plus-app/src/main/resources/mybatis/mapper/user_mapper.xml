@@ -10,23 +10,22 @@
         <result column="user_email" property="userEmail" jdbcType="VARCHAR"/>
         <result column="is_black" property="isBlack" jdbcType="INTEGER"/>
         <result column="is_vip" property="isVip" jdbcType="INTEGER"/>
-        <result column="count" property="count" jdbcType="INTEGER"/>
+        <result column="invoke_count" property="invokeCount" jdbcType="INTEGER"/>
         <result column="password" property="password" jdbcType="VARCHAR"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-
     <!-- 通过账号获取用户 -->
     <select id="getUserByUserId" resultMap="UserResultMap">
-        SELECT id, user_id, user_name, user_email, is_black, is_vip, count, password, create_time, update_time
+        SELECT id, user_id, user_name, user_email, is_black, is_vip, invoke_count, password, create_time, update_time
         FROM user
         WHERE user_id = #{userId}
     </select>
 
     <!-- 通过邮箱获取用户 -->
     <select id="getUserByUserEmail" resultMap="UserResultMap">
-        SELECT id, user_id, user_name, user_email, is_black, is_vip, count, password, create_time, update_time
+        SELECT id, user_id, user_name, user_email, is_black, is_vip, invoke_count, password, create_time, update_time
         FROM user
         WHERE user_email = #{userEmail}
     </select>
@@ -49,5 +48,19 @@
                      now()
                  )
     </insert>
+
+    <!-- 更新用户可调用次数 -->
+    <update id="updateInvokeCount" parameterType="chat.platform.plus.infrastructure.dao.po.User">
+        UPDATE user
+        SET invoke_count = invoke_count + #{invokeCount}, update_time = now()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!--  更新用户为VIP  -->
+    <update id="updateVip" parameterType="chat.platform.plus.infrastructure.dao.po.User">
+        UPDATE user
+        SET is_vip = #{isVip}, update_time = now()
+        WHERE user_id = #{userId}
+    </update>
 
 </mapper>

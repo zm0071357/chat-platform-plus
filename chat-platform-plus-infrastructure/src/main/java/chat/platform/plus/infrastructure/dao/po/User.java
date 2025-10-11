@@ -53,7 +53,7 @@ public class User {
     /**
      * 可调用次数 默认50次
      */
-    private Integer count;
+    private Integer invokeCount;
 
     /**
      * 密码

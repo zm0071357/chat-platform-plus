@@ -2,6 +2,7 @@ package chat.platform.plus.infrastructure.dao;
 
 import chat.platform.plus.infrastructure.dao.po.PayOrder;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -59,4 +60,32 @@ public interface PayOrderDao {
      * @return
      */
     Integer updateOrderStatusPayWait(PayOrder payOrderReq);
+
+    /**
+     * 更新订单状态为拼团完成
+     * @param outTradeNoList 外部交易单号集合 - 订单ID集合
+     * @return
+     */
+    Integer updateOrderStatusTeamComplete(@Param("outTradeNoList") List<String> outTradeNoList);
+
+    /**
+     * 根据订单ID获取未发货订单
+     * @param orderId 订单ID
+     * @return
+     */
+    PayOrder getUnDeliverGoodsOrder(String orderId);
+
+    /**
+     * 更新订单状态为交易完成
+     * @param orderId 订单ID
+     * @return
+     */
+    Integer updateOrderStatusDealDone(String orderId);
+
+    /**
+     * 更新订单折扣价格和支付价格
+     * @param payOrderReq
+     * @return
+     */
+    Integer updateOrderPrice(PayOrder payOrderReq);
 }

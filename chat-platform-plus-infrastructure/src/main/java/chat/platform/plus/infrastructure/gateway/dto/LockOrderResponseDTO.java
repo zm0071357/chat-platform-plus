@@ -1,4 +1,4 @@
-package chat.platform.plus.api.dto;
+package chat.platform.plus.infrastructure.gateway.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,41 +6,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
- * 创建支付订单响应体
+ * 锁单响应体
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreatePayOrderResponseDTO {
-
-    /**
-     * 用户ID
-     */
-    private String userId;
-
-    /**
-     * 商品ID
-     */
-    private String goodsId;
+public class LockOrderResponseDTO {
 
     /**
      * 订单ID
      */
     private String orderId;
-
-    /**
-     * 订单创建时间
-     */
-    private Date orderCreateTime;
-
-    /**
-     * 订单价格
-     */
-    private BigDecimal orderPrice;
 
     /**
      * 原始价格
@@ -53,13 +32,17 @@ public class CreatePayOrderResponseDTO {
     private BigDecimal deductionPrice;
 
     /**
-     * 最终支付价格
+     * 支付价格
      */
     private BigDecimal payPrice;
 
     /**
-     * 支付地址
+     * 是否为团长 0不是、1是
      */
-    private String payUrl;
+    private Integer isHeader;
 
+    /**
+     * 交易订单状态
+     */
+    private Integer tradeOrderStatus;
 }

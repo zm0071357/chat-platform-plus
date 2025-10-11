@@ -49,6 +49,11 @@ public class Goods {
     private Integer goodsType;
 
     /**
+     * 商品表达式
+     */
+    private Integer goodsExpr;
+
+    /**
      * 创建时间
      */
     private Date createTime;

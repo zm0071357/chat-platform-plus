@@ -31,7 +31,7 @@ public class LTZFConfig {
 
     @Bean(name = "nativePayService")
     public NativePayServiceImpl nativePayService(PayFactory payFactory) {
-        log.info("本地支付服务装配完成");
+        log.info("Native扫码支付服务装配完成");
         return payFactory.nativePayService();
     }
 

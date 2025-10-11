@@ -12,14 +12,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum GoodsTypeEnum {
 
-    COUNT(1, "调用次数"),
-    VIP(2, "VIP资格"),
-    OTHER(3, "其他")
+    COUNT(1, "count", "调用次数"),
+    VIP(2, "vip", "VIP资格"),
+    OTHER(3, "other", "其他")
     ;
 
     private Integer type;
+    private String deliverStrategy;
     private String info;
 
+    /**
+     * 获取商品类型枚举
+     * @param type 商品类型
+     * @return
+     */
     public static GoodsTypeEnum get(Integer type) {
         switch (type) {
             case 1:

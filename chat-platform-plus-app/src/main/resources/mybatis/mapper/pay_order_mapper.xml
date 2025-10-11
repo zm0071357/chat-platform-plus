@@ -9,6 +9,9 @@
         <result column="order_id" property="orderId"/>
         <result column="order_create_time" property="orderCreateTime"/>
         <result column="order_price" property="orderPrice"/>
+        <result column="order_type" property="orderType"/>
+        <result column="deduction_price" property="deductionPrice"/>
+        <result column="pay_price" property="payPrice"/>
         <result column="status" property="status"/>
         <result column="pay_url" property="payUrl"/>
         <result column="pay_time" property="payTime"/>
@@ -17,18 +20,19 @@
     </resultMap>
 
     <select id="getUnpaidOrder" resultMap="OrderResultMap" parameterType="chat.platform.plus.infrastructure.dao.po.PayOrder">
-        select user_id, goods_id, order_id, order_create_time, order_price, pay_url, status
+        select user_id, goods_id, order_id, order_create_time, order_price, order_type,
+               deduction_price, pay_price, pay_url, status
         from pay_order
         where user_id = #{userId} and goods_id = #{goodsId} and status = 2
     </select>
 
     <insert id="insert" parameterType="chat.platform.plus.infrastructure.dao.po.PayOrder">
         insert into pay_order(
-            user_id, goods_id, order_id, order_create_time,
-            order_price, status, create_time, update_time)
+            user_id, goods_id, order_id, order_create_time, order_price, order_type,
+            deduction_price, pay_price, status, create_time, update_time)
         values(
-                  #{userId}, #{goodsId},  #{orderId}, #{orderCreateTime},
-                  #{orderPrice}, #{status}, now(), now()
+               #{userId}, #{goodsId},  #{orderId}, #{orderCreateTime}, #{orderPrice},
+               #{orderType}, #{deductionPrice}, #{payPrice}, #{status}, now(), now()
               )
     </insert>
 
@@ -48,7 +52,6 @@
         where order_id = #{orderId}
     </update>
 
-
     <select id="getTimeOutOrderIdList" resultType="java.lang.String">
         <![CDATA[
         select order_id
@@ -66,7 +69,8 @@
     </update>
 
     <select id="getUnPaidOrder" resultMap="OrderResultMap">
-        select user_id, goods_id, order_id, order_create_time, order_price, pay_url, status
+        select user_id, goods_id, order_id, order_create_time, order_price, order_type,
+               deduction_price, pay_price, status, create_time, update_time
         from pay_order
         where order_id = #{orderId} and status = 2
     </select>
@@ -75,6 +79,33 @@
         update pay_order
         set status = 2, pay_url = #{payUrl}, update_time = now()
         where order_id = #{orderId}
+    </update>
+
+    <update id="updateOrderStatusTeamComplete">
+        update pay_order
+        set status = 6, update_time = now()
+        where order_id in
+        <foreach item="orderId" collection="outTradeNoList" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </update>
+
+    <select id="getUnDeliverGoodsOrder" resultMap="OrderResultMap" parameterType="java.lang.String">
+        select user_id, order_id, goods_id
+        from pay_order
+        where order_id = #{orderId} and status in (3, 6)
+    </select>
+
+    <update id="updateOrderStatusDealDone" parameterType="java.lang.String">
+        update pay_order
+        set status = 4, update_time = now()
+        where order_id = #{orderId}
+    </update>
+
+    <update id="updateOrderPrice" parameterType="chat.platform.plus.infrastructure.dao.po.PayOrder">
+        update pay_order
+        set deduction_price = #{deductionPrice}, pay_price = #{payPrice}, update_time = now()
+        where order_id = #{orderId} and status = 1
     </update>
 
 </mapper>

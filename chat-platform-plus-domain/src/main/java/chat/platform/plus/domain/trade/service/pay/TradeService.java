@@ -4,6 +4,7 @@ import chat.platform.plus.domain.trade.model.entity.PayOrderEntity;
 import chat.platform.plus.domain.trade.model.entity.ShopCartEntity;
 
 import java.util.Date;
+import java.util.List;
 
 public interface TradeService {
 
@@ -16,16 +17,16 @@ public interface TradeService {
     PayOrderEntity createOrder(ShopCartEntity shopCartEntity) throws Exception;
 
     /**
-     * 根据订单ID获取待支付订单
+     * 订单支付成功
      * @param orderId 订单ID
-     * @return
+     * @param orderPayTime 订单支付事件
      */
-    PayOrderEntity getUnPaidOrder(String orderId) throws Exception;
+    void orderPaySuccess(String orderId, Date orderPayTime) throws Exception;
 
     /**
-     * 更新订单状态为已支付
-     * @param orderId 订单ID
-     * @param payTime 支付时间
+     * 拼团完成
+     * @param teamId 组队ID
+     * @param outTradeNoList 外部交易单号集合
      */
-    Integer updateOrderStatusPaySuccess(String orderId, Date payTime) throws Exception;
+    void orderTeamComplete(String teamId, List<String> outTradeNoList) throws Exception;
 }

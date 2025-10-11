@@ -32,7 +32,7 @@ public class UserFilter implements LogicHandler<CheckEntity, DefaultLinkFactory.
                     .build();
         }
         // 可用次数过滤 - VIP用户不受可用次数影响
-        if (userEntity.getIsVIP() == 0 && userEntity.getCount() <= 0) {
+        if (userEntity.getIsVIP() == 0 && userEntity.getInvokeCount() <= 0) {
             log.info("用户校验过滤节点，可用次数不足，结束:{}", checkEntity.getUserId());
             return HandleEntity.builder()
                     .isSuccess(false)

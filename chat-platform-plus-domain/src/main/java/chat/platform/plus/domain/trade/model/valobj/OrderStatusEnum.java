@@ -16,6 +16,7 @@ public enum OrderStatusEnum {
     PAY_SUCCESS(3, "支付成功"),
     DEAL_DONE(4, "交易完成"),
     CLOSE(5, "超时关单"),
+    GROUP_BUY_COMPLETE(6, "拼团完成")
     ;
 
     private Integer status;
@@ -38,6 +39,8 @@ public enum OrderStatusEnum {
                 return DEAL_DONE;
             case 5:
                 return CLOSE;
+            case 6:
+                return GROUP_BUY_COMPLETE;
             default:
                 throw new Exception("不存在的订单状态");
         }

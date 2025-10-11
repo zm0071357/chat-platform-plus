@@ -1,9 +1,6 @@
 package chat.platform.plus.api;
 
-import chat.platform.plus.api.dto.CreatePayOrderRequestDTO;
-import chat.platform.plus.api.dto.CreatePayOrderResponseDTO;
-import chat.platform.plus.api.dto.GoodsDetailResDTO;
-import chat.platform.plus.api.dto.GoodsResDTO;
+import chat.platform.plus.api.dto.*;
 import chat.platform.plus.api.response.Response;
 import org.springframework.http.ResponseEntity;
 
@@ -63,5 +60,12 @@ public interface ShoppingService {
             String successTime,
             String attach,
             String openid);
+
+    /**
+     * 拼团营销服务 - 成团结算回调
+     * @param groupBuyNotifyDTO
+     * @return
+     */
+    String groupBuyNotify(GroupBuyNotifyDTO groupBuyNotifyDTO);
 
 }

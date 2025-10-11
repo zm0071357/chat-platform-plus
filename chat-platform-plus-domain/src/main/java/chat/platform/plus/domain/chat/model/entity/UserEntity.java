@@ -36,6 +36,6 @@ public class UserEntity {
     /**
      * 可调用次数
      */
-    private Integer count;
+    private Integer invokeCount;
 
 }

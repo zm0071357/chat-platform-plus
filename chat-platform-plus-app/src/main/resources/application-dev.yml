@@ -21,7 +21,7 @@ spring:
     pgvector:
       username:
       password:
-      url:
+      url: jdbc:postgresql:///postgres
       driver-class-name: org.postgresql.Driver
       hikari:
         maximum-pool-size: 25
@@ -62,7 +62,8 @@ redis:
   sdk:
     config:
       host:
-      port: 16379
+      port:
+      password:
       pool-size: 10
       min-idle-size: 5
       idle-timeout: 30000
@@ -111,17 +112,28 @@ sa-token:
   # 是否输出操作日志
   is-log: true
 
+# GitHub
 github:
   username:
   token:
 
+# 蓝兔支付
 ltzf:
   sdk:
     config:
-      app_id:      # 应用者ID
-      mch_id:   # 商户号
-      partner_key:    # 密钥
+      app_id:     # 应用者 Id
+      mch_id:     # 商户号
+      partner_key: # 密钥
       notify_url:
+
+# 拼团营销服务
+app:
+  config:
+    groupbuy-market-plus:
+      api_url:
+      notify_url:
+      source:
+      channel:
 
 # 日志
 logging:

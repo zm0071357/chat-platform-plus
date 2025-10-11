@@ -1,16 +1,14 @@
 package chat.platform.plus.trigger.http;
 
 import chat.platform.plus.api.ShoppingService;
-import chat.platform.plus.api.dto.CreatePayOrderRequestDTO;
-import chat.platform.plus.api.dto.CreatePayOrderResponseDTO;
-import chat.platform.plus.api.dto.GoodsDetailResDTO;
-import chat.platform.plus.api.dto.GoodsResDTO;
+import chat.platform.plus.api.dto.*;
 import chat.platform.plus.api.response.Response;
 import chat.platform.plus.domain.trade.model.entity.GoodsDetailEntity;
 import chat.platform.plus.domain.trade.model.entity.GoodsEntity;
 import chat.platform.plus.domain.trade.model.entity.PayOrderEntity;
 import chat.platform.plus.domain.trade.model.entity.ShopCartEntity;
 import chat.platform.plus.domain.trade.model.valobj.OrderStatusEnum;
+import chat.platform.plus.domain.trade.model.valobj.OrderTypesEnum;
 import chat.platform.plus.domain.trade.service.goods.GoodsService;
 import chat.platform.plus.domain.trade.service.pay.TradeService;
 import chat.platform.plus.types.enums.CommonEnum;
@@ -96,7 +94,8 @@ public class ShoppingController implements ShoppingService {
     public Response<CreatePayOrderResponseDTO> createPayOrder(@RequestBody CreatePayOrderRequestDTO createPayOrderRequestDTO) {
         try {
             // 参数校验
-            if (StringUtils.isBlank(createPayOrderRequestDTO.getGoodsId()) || StringUtils.isBlank(createPayOrderRequestDTO.getUserId())) {
+            if (StringUtils.isBlank(createPayOrderRequestDTO.getGoodsId()) || StringUtils.isBlank(createPayOrderRequestDTO.getUserId()) ||
+                    createPayOrderRequestDTO.getActivityId() == null || createPayOrderRequestDTO.getOrderType() == null) {
                 return Response.<CreatePayOrderResponseDTO>builder()
                         .code(CommonEnum.LACK_PARAM.getCode())
                         .info(CommonEnum.LACK_PARAM.getInfo())
@@ -106,7 +105,10 @@ public class ShoppingController implements ShoppingService {
             // 创建支付订单
             PayOrderEntity payOrderEntity = tradeService.createOrder(ShopCartEntity.builder()
                             .userId(createPayOrderRequestDTO.getUserId())
+                            .teamId(createPayOrderRequestDTO.getTeamId())
                             .goodsId(createPayOrderRequestDTO.getGoodsId())
+                            .activityId(createPayOrderRequestDTO.getActivityId())
+                            .orderTypesEnum(OrderTypesEnum.get(createPayOrderRequestDTO.getOrderType()))
                             .build());
             log.info("创建支付订单完成，用户ID：{}，商品ID：{}，订单信息：{}", createPayOrderRequestDTO.getUserId(), createPayOrderRequestDTO.getGoodsId(), JSON.toJSONString(payOrderEntity));
             return Response.<CreatePayOrderResponseDTO>builder()
@@ -116,6 +118,9 @@ public class ShoppingController implements ShoppingService {
                             .goodsId(payOrderEntity.getGoodsId())
                             .orderId(payOrderEntity.getOrderId())
                             .orderPrice(payOrderEntity.getOrderPrice())
+                            .originalPrice(payOrderEntity.getOriginalPrice())
+                            .deductionPrice(payOrderEntity.getDeductionPrice())
+                            .payPrice(payOrderEntity.getPayPrice())
                             .orderCreateTime(payOrderEntity.getOrderCreateTime())
                             .payUrl(payOrderEntity.getPayUrl())
                             .build())
@@ -149,21 +154,33 @@ public class ShoppingController implements ShoppingService {
             log.info("支付回调，请求参数：{} {} {} {} {} {} {} {} {} {} {} {} {}",
                     code, timestamp, mchId, orderNo, orderId, payNo, orderPrice,
                     sign, payChannel, tradeType, successTime, attach, openid);
+            // TODO：签名验签
+
             // 支付回调结果成功
             if (code.equals(CodeEnum.SUCCESS.getCode()) && successTime != null) {
-                // 校验订单状态 - 待支付则更新为已支付
-                PayOrderEntity payOrderEntity = tradeService.getUnPaidOrder(orderId);
-                if (payOrderEntity != null) {
-                    if (payOrderEntity.getOrderStatusEnum().equals(OrderStatusEnum.PAY_WAIT)) {
-                        log.info("订单状态为待支付，更新为已支付，订单ID：{}", orderId);
-                        Integer updateCount = tradeService.updateOrderStatusPaySuccess(orderId, DateUtils.parseDate(successTime, "yyyy-MM-dd HH:mm:ss"));
-                        log.info("订单ID：{}，更新记录数：{} 支付回调完成", orderId, updateCount);
-                    }
-                }
+                log.info("订单支付成功，订单ID：{}", orderNo);
+                tradeService.orderPaySuccess(orderId, DateUtils.parseDate(successTime, "yyyy-MM-dd HH:mm:ss"));
             }
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/group_buy_notify")
+    @Override
+    public String groupBuyNotify(@RequestBody GroupBuyNotifyDTO groupBuyNotifyDTO) {
+        if (StringUtils.isBlank(groupBuyNotifyDTO.getTeamId()) || groupBuyNotifyDTO.getOutTradeNoList() == null || groupBuyNotifyDTO.getOutTradeNoList().isEmpty()) {
+            return "FAIL";
+        }
+        try {
+            log.info("拼团营销服务 - 成团回调结算开始：{}", JSON.toJSONString(groupBuyNotifyDTO));
+            tradeService.orderTeamComplete(groupBuyNotifyDTO.getTeamId(), groupBuyNotifyDTO.getOutTradeNoList());
+            log.info("拼团营销服务 - 成团回调结算完成：{}", JSON.toJSONString(groupBuyNotifyDTO));
+            return "SUCCESS";
+        } catch (Exception e) {
+            log.info("拼团营销服务 - 成团回调结算失败：{}", JSON.toJSONString(groupBuyNotifyDTO), e);
+            return "FAIL";
         }
     }
 

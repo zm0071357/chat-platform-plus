@@ -1,5 +1,6 @@
 package chat.platform.plus.infrastructure.adapter.repository;
 
+import chat.platform.plus.domain.trade.adapter.port.TradePort;
 import chat.platform.plus.domain.trade.adapter.repository.TradeRepository;
 import chat.platform.plus.domain.trade.model.entity.GoodsDetailEntity;
 import chat.platform.plus.domain.trade.model.entity.GoodsEntity;
@@ -7,6 +8,8 @@ import chat.platform.plus.domain.trade.model.entity.PayOrderEntity;
 import chat.platform.plus.domain.trade.model.entity.PrePayOrderEntity;
 import chat.platform.plus.domain.trade.model.valobj.GoodsTypeEnum;
 import chat.platform.plus.domain.trade.model.valobj.OrderStatusEnum;
+import chat.platform.plus.domain.trade.model.valobj.OrderTypesEnum;
+import chat.platform.plus.domain.trade.service.deliver.DeliverService;
 import chat.platform.plus.infrastructure.dao.GoodsDao;
 import chat.platform.plus.infrastructure.dao.PayOrderDao;
 import chat.platform.plus.infrastructure.dao.po.Goods;
@@ -14,10 +17,13 @@ import chat.platform.plus.infrastructure.dao.po.PayOrder;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Repository
@@ -28,6 +34,12 @@ public class TradeRepositoryImpl implements TradeRepository {
 
     @Resource
     private PayOrderDao payOrderDao;
+
+    @Resource
+    private TradePort tradePort;
+
+    @Resource
+    private Map<String, DeliverService> deliverServiceMap;
 
     @Override
     public List<GoodsEntity> getGoodsList() {
@@ -76,6 +88,10 @@ public class TradeRepositoryImpl implements TradeRepository {
                 .orderId(payOrder.getOrderId())
                 .orderCreateTime(payOrder.getOrderCreateTime())
                 .orderPrice(payOrder.getOrderPrice())
+                .originalPrice(payOrder.getOrderPrice())
+                .orderTypesEnum(OrderTypesEnum.get(payOrder.getOrderType()))
+                .deductionPrice(payOrder.getDeductionPrice())
+                .payPrice(payOrder.getPayPrice())
                 .payUrl(payOrder.getPayUrl())
                 .orderStatusEnum(OrderStatusEnum.get(payOrder.getStatus()))
                 .build();
@@ -89,6 +105,7 @@ public class TradeRepositoryImpl implements TradeRepository {
                         .orderId(prePayOrderEntity.getOrderId())
                         .orderCreateTime(prePayOrderEntity.getOrderCreateTime())
                         .orderPrice(prePayOrderEntity.getOrderPrice())
+                        .orderType(prePayOrderEntity.getOrderTypesEnum().getType())
                         .status(prePayOrderEntity.getOrderStatusEnum().getStatus())
                         .build());
     }
@@ -100,7 +117,7 @@ public class TradeRepositoryImpl implements TradeRepository {
     }
 
     @Override
-    public Integer updateOrderStatusPaySuccess(String orderId, Date payTime) throws Exception {
+    public void updateOrderStatusPaySuccess(String orderId, Date payTime) throws Exception {
         PayOrder payOrderReq = new PayOrder();
         payOrderReq.setOrderId(orderId);
         payOrderReq.setPayTime(payTime);
@@ -108,7 +125,6 @@ public class TradeRepositoryImpl implements TradeRepository {
         if (updateCount != 1) {
             throw new Exception("更新记录为0");
         }
-        return updateCount;
     }
 
     @Override
@@ -134,6 +150,7 @@ public class TradeRepositoryImpl implements TradeRepository {
                 .orderId(payOrder.getOrderId())
                 .orderCreateTime(payOrder.getCreateTime())
                 .orderPrice(payOrder.getOrderPrice())
+                .orderTypesEnum(OrderTypesEnum.get(payOrder.getOrderType()))
                 .orderStatusEnum(OrderStatusEnum.get(payOrder.getStatus()))
                 .build();
     }
@@ -146,6 +163,71 @@ public class TradeRepositoryImpl implements TradeRepository {
         Integer updateCount = payOrderDao.updateOrderStatusPayWait(payOrderReq);
         if (updateCount != 1) {
             throw new Exception("更新记录为0");
+        }
+    }
+
+    @Override
+    public void updateOrderStatusTeamComplete(List<String> outTradeNoList) throws Exception {
+        Integer updateCount = payOrderDao.updateOrderStatusTeamComplete(outTradeNoList);
+        if (updateCount != outTradeNoList.size()) {
+            throw new Exception("更新记录为0");
+        }
+    }
+
+    @Override
+    @Transactional(timeout = 500)
+    public void deliverGoods(String orderId) throws Exception {
+        // 获取未发货订单
+        PayOrder payOrder = payOrderDao.getUnDeliverGoodsOrder(orderId);
+        if (payOrder != null) {
+            Goods goods = goodsDao.getGoodsByID(payOrder.getGoodsId());
+            // 枚举策略模式处理商品发货
+            GoodsTypeEnum goodsTypeEnum = GoodsTypeEnum.get(goods.getGoodsType());
+            DeliverService deliverService = deliverServiceMap.get(goodsTypeEnum.getDeliverStrategy());
+            deliverService.deliver(payOrder.getUserId(), goods.getGoodsExpr());
+            // 更新订单状态为交易完成
+            Integer updateCount = payOrderDao.updateOrderStatusDealDone(orderId);
+            if (updateCount != 1) {
+                throw new Exception("更新记录为0");
+            }
+        }
+    }
+
+    @Override
+    public void deliverGoods(List<String> orderIdList) throws Exception {
+        for (String orderId : orderIdList) {
+            this.deliverGoods(orderId);
+        }
+    }
+
+    @Override
+    public void updateOrderPrice(String orderId, BigDecimal deductionPrice, BigDecimal payPrice) throws Exception {
+        PayOrder payOrderReq = new PayOrder();
+        payOrderReq.setOrderId(orderId);
+        payOrderReq.setDeductionPrice(deductionPrice);
+        payOrderReq.setPayPrice(payPrice);
+        Integer updateCount = payOrderDao.updateOrderPrice(payOrderReq);
+        if (updateCount != 1) {
+            throw new Exception("更新记录为0");
+        }
+    }
+
+    @Override
+    public void settle(String orderId, Date orderPayTime) throws Exception {
+        PayOrderEntity payOrderEntity = this.getUnPaidOrder(orderId);
+        if (payOrderEntity != null && payOrderEntity.getOrderStatusEnum().equals(OrderStatusEnum.PAY_WAIT)) {
+            log.info("订单状态为待支付，更新为已支付，订单ID：{}", orderId);
+            this.updateOrderStatusPaySuccess(orderId, orderPayTime);
+            // 校验订单类型 - 拼团购买则调用拼团营销服务结算
+            if (payOrderEntity.getOrderTypesEnum().equals(OrderTypesEnum.GROUPBUY)) {
+                log.info("订单类型为拼团购买，进行结算，订单ID：{}", orderId);
+                // 结算完成后 - 由拼团营销服务回调进行发货处理
+                tradePort.settleOrder(payOrderEntity.getUserId(), orderId, orderPayTime);
+            } else {
+                // 发货
+                log.info("订单类型为直接购买，进行发货，订单ID：{}", orderId);
+                this.deliverGoods(orderId);
+            }
         }
     }
 
