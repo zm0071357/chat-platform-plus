@@ -1,5 +1,6 @@
 package chat.platform.plus.api.dto;
 
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 /**
  * 成团结算回调请求体
  */
-@Getter
+@Data
 public class GroupBuyNotifyDTO {
 
     /**

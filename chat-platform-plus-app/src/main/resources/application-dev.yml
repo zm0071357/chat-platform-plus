@@ -21,7 +21,7 @@ spring:
     pgvector:
       username:
       password:
-      url: jdbc:postgresql:///postgres
+      url:
       driver-class-name: org.postgresql.Driver
       hikari:
         maximum-pool-size: 25
@@ -51,6 +51,37 @@ spring:
     multipart:
       max-request-size: 10MB
       max-file-size: 10MB
+
+  # RabbitMQ
+  rabbitmq:
+    addresses:
+    port:
+    username:
+    password:
+    listener:
+      simple:
+        prefetch: 1 # 每次投递n个消息，消费完在投递n个
+    template:
+      delivery-mode: persistent # 确保全局默认设置为持久化（可选）
+    # 消息配置
+    config:
+      # 生产者
+      producer:
+        exchange: chat_platform_plus_exchange
+        topic_order_pay_success:
+          topic: topic.order_pay_success
+          queue: chat_platform_plus_order_pay_success_queue
+      # 消费者
+      consumer:
+        topic_team_success:
+          exchange: groupbuy_market_plus_exchange
+          routing_key: topic.team_success
+          queue: groupbuy_market_plus_topic_team_success_queue
+
+        topic_order_pay_success:
+          exchange: chat_platform_plus_exchange
+          routing_key: topic.order_pay_success
+          queue: chat_platform_plus_order_pay_success_queue
 
 # MyBatis 配置
 mybatis:
@@ -121,8 +152,8 @@ github:
 ltzf:
   sdk:
     config:
-      app_id:     # 应用者 Id
-      mch_id:     # 商户号
+      app_id:      # 应用者 Id
+      mch_id:      # 商户号
       partner_key: # 密钥
       notify_url:
 
@@ -132,8 +163,8 @@ app:
     groupbuy-market-plus:
       api_url:
       notify_url:
-      source:
-      channel:
+      source: s01
+      channel: c01
 
 # 日志
 logging:

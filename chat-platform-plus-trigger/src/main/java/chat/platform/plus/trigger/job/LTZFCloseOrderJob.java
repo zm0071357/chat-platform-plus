@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class LTZFCLoseOrderJob {
+public class LTZFCloseOrderJob {
 
     @Resource
     private TradeRepository tradeRepository;

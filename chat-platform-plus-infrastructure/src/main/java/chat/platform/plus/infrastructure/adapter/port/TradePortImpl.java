@@ -83,7 +83,8 @@ public class TradePortImpl implements TradePort {
         requestDTO.setSource(source);
         requestDTO.setChannel(channel);
         requestDTO.setOutTradeNo(orderId);
-        requestDTO.setNotifyUrl(groupBuyNotifyUrl);
+        //requestDTO.setNotifyUrl(groupBuyNotifyUrl);
+        requestDTO.setNotifyMQ();
         try {
             log.info("请求拼团锁单接口开始：{}", JSON.toJSONString(requestDTO));
             Call<Response<LockOrderResponseDTO>> call = groupBuyMarketService.lockOrder(requestDTO);

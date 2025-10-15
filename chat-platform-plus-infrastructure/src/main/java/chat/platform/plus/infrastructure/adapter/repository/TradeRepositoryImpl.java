@@ -1,5 +1,6 @@
 package chat.platform.plus.infrastructure.adapter.repository;
 
+import chat.platform.plus.domain.trade.adapter.event.OrderPaySuccessMessageEvent;
 import chat.platform.plus.domain.trade.adapter.port.TradePort;
 import chat.platform.plus.domain.trade.adapter.repository.TradeRepository;
 import chat.platform.plus.domain.trade.model.entity.GoodsDetailEntity;
@@ -14,6 +15,9 @@ import chat.platform.plus.infrastructure.dao.GoodsDao;
 import chat.platform.plus.infrastructure.dao.PayOrderDao;
 import chat.platform.plus.infrastructure.dao.po.Goods;
 import chat.platform.plus.infrastructure.dao.po.PayOrder;
+import chat.platform.plus.infrastructure.event.EventPublisher;
+import chat.platform.plus.types.event.BaseEvent;
+import com.alibaba.fastjson2.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -36,10 +40,13 @@ public class TradeRepositoryImpl implements TradeRepository {
     private PayOrderDao payOrderDao;
 
     @Resource
-    private TradePort tradePort;
+    private Map<String, DeliverService> deliverServiceMap;
 
     @Resource
-    private Map<String, DeliverService> deliverServiceMap;
+    private EventPublisher eventPublisher;
+
+    @Resource
+    private OrderPaySuccessMessageEvent orderPaySuccessMessageEvent;
 
     @Override
     public List<GoodsEntity> getGoodsList() {
@@ -218,16 +225,17 @@ public class TradeRepositoryImpl implements TradeRepository {
         if (payOrderEntity != null && payOrderEntity.getOrderStatusEnum().equals(OrderStatusEnum.PAY_WAIT)) {
             log.info("订单状态为待支付，更新为已支付，订单ID：{}", orderId);
             this.updateOrderStatusPaySuccess(orderId, orderPayTime);
-            // 校验订单类型 - 拼团购买则调用拼团营销服务结算
-            if (payOrderEntity.getOrderTypesEnum().equals(OrderTypesEnum.GROUPBUY)) {
-                log.info("订单类型为拼团购买，进行结算，订单ID：{}", orderId);
-                // 结算完成后 - 由拼团营销服务回调进行发货处理
-                tradePort.settleOrder(payOrderEntity.getUserId(), orderId, orderPayTime);
-            } else {
-                // 发货
-                log.info("订单类型为直接购买，进行发货，订单ID：{}", orderId);
-                this.deliverGoods(orderId);
-            }
+            // MQ发送消息
+            BaseEvent.EventMessage<OrderPaySuccessMessageEvent.OrderPaySuccessMessage> orderPaySuccessMessageEventMessage = orderPaySuccessMessageEvent.buildEventMessage(
+                    OrderPaySuccessMessageEvent.OrderPaySuccessMessage.builder()
+                            .userId(payOrderEntity.getUserId())
+                            .orderId(orderId)
+                            .orderPayTime(orderPayTime)
+                            .orderTypesEnum(payOrderEntity.getOrderTypesEnum())
+                            .build()
+            );
+            OrderPaySuccessMessageEvent.OrderPaySuccessMessage orderPaySuccessMessage = orderPaySuccessMessageEventMessage.getData();
+            eventPublisher.publish(orderPaySuccessMessageEvent.topic(), JSON.toJSONString(orderPaySuccessMessage));
         }
     }
 
