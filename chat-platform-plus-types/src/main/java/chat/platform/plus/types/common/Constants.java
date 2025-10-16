@@ -10,4 +10,7 @@ public class Constants {
                 DOCUMENTS:
                     {documents}
                 """;
+    public static final String OrderNotifyJobLock = "lztf_order_notify_job_lock";
+    public static final String OrderLock = "lztf_order_lock_";
+    public static final String CloseOrderJobLock = "lztf_order_close_job_lock";
 }

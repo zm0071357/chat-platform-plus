@@ -1,7 +1,6 @@
 package chat.platform.plus.infrastructure.adapter.repository;
 
 import chat.platform.plus.domain.trade.adapter.event.OrderPaySuccessMessageEvent;
-import chat.platform.plus.domain.trade.adapter.port.TradePort;
 import chat.platform.plus.domain.trade.adapter.repository.TradeRepository;
 import chat.platform.plus.domain.trade.model.entity.GoodsDetailEntity;
 import chat.platform.plus.domain.trade.model.entity.GoodsEntity;
@@ -16,10 +15,13 @@ import chat.platform.plus.infrastructure.dao.PayOrderDao;
 import chat.platform.plus.infrastructure.dao.po.Goods;
 import chat.platform.plus.infrastructure.dao.po.PayOrder;
 import chat.platform.plus.infrastructure.event.EventPublisher;
+import chat.platform.plus.types.common.Constants;
 import chat.platform.plus.types.event.BaseEvent;
 import com.alibaba.fastjson2.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Repository
@@ -47,6 +50,9 @@ public class TradeRepositoryImpl implements TradeRepository {
 
     @Resource
     private OrderPaySuccessMessageEvent orderPaySuccessMessageEvent;
+
+    @Resource
+    private RedissonClient redissonClient;
 
     @Override
     public List<GoodsEntity> getGoodsList() {
@@ -221,21 +227,40 @@ public class TradeRepositoryImpl implements TradeRepository {
 
     @Override
     public void settle(String orderId, Date orderPayTime) throws Exception {
-        PayOrderEntity payOrderEntity = this.getUnPaidOrder(orderId);
-        if (payOrderEntity != null && payOrderEntity.getOrderStatusEnum().equals(OrderStatusEnum.PAY_WAIT)) {
-            log.info("订单状态为待支付，更新为已支付，订单ID：{}", orderId);
-            this.updateOrderStatusPaySuccess(orderId, orderPayTime);
-            // MQ发送消息
-            BaseEvent.EventMessage<OrderPaySuccessMessageEvent.OrderPaySuccessMessage> orderPaySuccessMessageEventMessage = orderPaySuccessMessageEvent.buildEventMessage(
-                    OrderPaySuccessMessageEvent.OrderPaySuccessMessage.builder()
-                            .userId(payOrderEntity.getUserId())
-                            .orderId(orderId)
-                            .orderPayTime(orderPayTime)
-                            .orderTypesEnum(payOrderEntity.getOrderTypesEnum())
-                            .build()
-            );
-            OrderPaySuccessMessageEvent.OrderPaySuccessMessage orderPaySuccessMessage = orderPaySuccessMessageEventMessage.getData();
-            eventPublisher.publish(orderPaySuccessMessageEvent.topic(), JSON.toJSONString(orderPaySuccessMessage));
+        RLock lock = redissonClient.getLock(Constants.OrderLock + orderId);
+        try {
+            // 尝试获取锁
+            boolean getLock = lock.tryLock(3, 30, TimeUnit.SECONDS);
+            if (!getLock) {
+                log.info("获取锁失败：{}，此时有其他线程在结算订单，订单ID：{}", Constants.OrderLock + orderId, orderId);
+                return;
+            }
+            log.info("获取锁成功：{}，开始处理订单，订单ID：{}", Constants.OrderLock + orderId, orderId);
+            // 判断订单状态 - 防止重复结算
+            PayOrderEntity payOrderEntity = this.getUnPaidOrder(orderId);
+            if (payOrderEntity != null && payOrderEntity.getOrderStatusEnum().equals(OrderStatusEnum.PAY_WAIT)) {
+                log.info("订单状态为待支付，更新为已支付，订单ID：{}", orderId);
+                this.updateOrderStatusPaySuccess(orderId, orderPayTime);
+                // MQ发送消息
+                BaseEvent.EventMessage<OrderPaySuccessMessageEvent.OrderPaySuccessMessage> orderPaySuccessMessageEventMessage = orderPaySuccessMessageEvent.buildEventMessage(
+                        OrderPaySuccessMessageEvent.OrderPaySuccessMessage.builder()
+                                .userId(payOrderEntity.getUserId())
+                                .orderId(orderId)
+                                .orderPayTime(orderPayTime)
+                                .orderTypesEnum(payOrderEntity.getOrderTypesEnum())
+                                .build()
+                );
+                OrderPaySuccessMessageEvent.OrderPaySuccessMessage orderPaySuccessMessage = orderPaySuccessMessageEventMessage.getData();
+                eventPublisher.publish(orderPaySuccessMessageEvent.topic(), JSON.toJSONString(orderPaySuccessMessage));
+            }
+        } catch (Exception e) {
+            log.info("订单结算失败，订单ID：{}", orderId, e);
+            throw e;
+        } finally {
+            // 检查锁是否被任何线程持有以及是否被当前线程持有 - 释放锁
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 

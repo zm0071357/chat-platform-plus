@@ -2,9 +2,7 @@ package chat.platform.plus.trigger.job;
 
 import chat.platform.plus.domain.trade.adapter.port.TradePort;
 import chat.platform.plus.domain.trade.adapter.repository.TradeRepository;
-import chat.platform.plus.domain.trade.model.entity.PayOrderEntity;
-import chat.platform.plus.domain.trade.model.valobj.OrderTypesEnum;
-import chat.platform.plus.domain.trade.service.pay.TradeService;
+import chat.platform.plus.types.common.Constants;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.util.DateUtils;
 import jakarta.annotation.Resource;
@@ -12,12 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import ltzf.common.CodeEnum;
 import ltzf.common.PayStatusEnum;
 import ltzf.payments.nativepay.model.order.OrderResponse;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 订单支付回调任务
@@ -32,10 +31,19 @@ public class LTZFOrderNotifyJob {
     @Resource
     private TradePort tradePort;
 
+    @Resource
+    private RedissonClient redissonClient;
+
     @Scheduled(cron = "0/10 * * * * ?")
     private void exec() {
+        RLock lock = redissonClient.getLock(Constants.OrderNotifyJobLock);
         try {
-            log.info("订单支付回调任务开始");
+            boolean getLock = lock.tryLock(3, 30, TimeUnit.SECONDS);
+            if (!getLock) {
+                log.info("获取锁失败：{}，此时有其他应用在执行订单支付回调任务，等待", Constants.OrderNotifyJobLock);
+                return;
+            }
+            log.info("获取锁成功：{}，订单支付回调任务开始", Constants.OrderNotifyJobLock);
             List<String> orderIdList = tradeRepository.getUnNotifyOrderIdList();
             if (orderIdList == null || orderIdList.isEmpty()) {
                 log.info("没有需要回调的订单 - 订单支付回调任务结束");
@@ -55,6 +63,11 @@ public class LTZFOrderNotifyJob {
             log.info("订单支付回调任务结束");
         } catch (Exception e) {
             log.info("订单支付回调任务执行异常", e);
+        } finally {
+            // 检查锁是否被任何线程持有以及是否被当前线程持有 - 释放锁
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 }
