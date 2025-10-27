@@ -16,4 +16,11 @@ public interface DeliverRepository {
      */
     void deliverVip(String userId, Integer goodsExpr) throws Exception;
 
+    /**
+     * 积分发货
+     * @param userId 用户ID
+     * @param goodsExpr 商品表达式
+     */
+    void deliverPoints(String userId, Integer goodsExpr) throws Exception;
+
 }

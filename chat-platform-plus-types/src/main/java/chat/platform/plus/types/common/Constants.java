@@ -11,6 +11,8 @@ public class Constants {
                     {documents}
                 """;
     public static final String OrderNotifyJobLock = "lztf_order_notify_job_lock";
+    public static final String RefundOrderNotifyJobLock = "lztf_refund_order_notify_job_lock";
     public static final String OrderLock = "lztf_order_lock_";
     public static final String CloseOrderJobLock = "lztf_order_close_job_lock";
+    public static final String HeaderRefundCompensateJobLock = "header_refund_compensate_job_lock";
 }

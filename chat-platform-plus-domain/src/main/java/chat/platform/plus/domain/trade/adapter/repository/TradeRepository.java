@@ -1,9 +1,6 @@
 package chat.platform.plus.domain.trade.adapter.repository;
 
-import chat.platform.plus.domain.trade.model.entity.GoodsDetailEntity;
-import chat.platform.plus.domain.trade.model.entity.GoodsEntity;
-import chat.platform.plus.domain.trade.model.entity.PayOrderEntity;
-import chat.platform.plus.domain.trade.model.entity.PrePayOrderEntity;
+import chat.platform.plus.domain.trade.model.entity.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -32,7 +29,7 @@ public interface TradeRepository {
     PayOrderEntity getUnPaidOrder(String userId, String goodsId) throws Exception;
 
     /**
-     * 保存预支付
+     * 保存预支付订单
      * @param prePayOrderEntity
      * @return
      */
@@ -112,4 +109,65 @@ public interface TradeRepository {
      * @param orderPayTime 订单支付时间
      */
     void settle(String orderId, Date orderPayTime) throws Exception;
+
+    /**
+     * 查询用户是否退单
+     * @param userId 用户ID
+     * @param orderId 订单ID
+     * @return
+     */
+    RefundOrderEntity getRefundOrder(String userId, String orderId) throws Exception;
+
+    /**
+     * 获取订单
+     * @param userId 用户ID
+     * @param orderId 订单ID
+     * @return
+     */
+    PayOrderEntity getPayOrder(String userId, String orderId) throws Exception;
+
+    /**
+     * 保存退单订单
+     * @param refundOrderEntity
+     */
+    void saveRefundOrder(RefundOrderEntity refundOrderEntity);
+
+    /**
+     * 订单退款成功
+     * @param refundOrderId 退单订单ID
+     * @param refundTime 退单时间
+     */
+    void orderRefundSuccess(String refundOrderId, Date refundTime) throws Exception;
+
+    /**
+     * 获取未补偿完成的团长退单补偿任务
+     * @return
+     */
+    List<HeaderCompensateTaskEntity> getUnCompleteHeaderRefundCompensateTaskList() throws Exception;
+
+    /**
+     * 保存团长退单补偿任务
+     * @param userId 用户ID
+     * @param teamId 拼团组队ID
+     * @param teamStatus 拼团组队状态
+     */
+    void saveHeaderRefundCompensateTask(String userId, String teamId, Integer teamStatus) ;
+
+    /**
+     * 进行团长退单补偿
+     * @param headerId
+     * @param teamId
+     * @param teamStatus
+     */
+    void headerRefundCompensate(String headerId, String teamId, Integer teamStatus) throws Exception;
+
+    /**
+     * 团长退单补偿失败
+     * @param headerId
+     * @param teamId
+     * @param teamStatus
+     */
+    void headerRefundCompensateFail(String headerId, String teamId, Integer teamStatus) throws Exception;
+
+    List<String> getUnNotifyRefundOrderIdList();
 }

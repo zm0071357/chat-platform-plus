@@ -39,7 +39,7 @@ public class OrderPaySuccessListener {
     public void listener(String message) throws Exception {
         try {
             log.info("浅度浏览AI服务 - 监听订单支付完成队列 - 接收到消息：{}，进行处理", message);
-            // 将message序列化
+            // 反序列化
             OrderPaySuccessMessageEvent.OrderPaySuccessMessage orderPaySuccessMessage = JSON.parseObject(message, OrderPaySuccessMessageEvent.OrderPaySuccessMessage.class);
             if (orderPaySuccessMessage.getOrderTypesEnum().equals(OrderTypesEnum.GROUPBUY)) {
                 log.info("订单类型为拼团购买，进行结算，订单ID：{}", orderPaySuccessMessage.getOrderId());

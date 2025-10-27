@@ -1,7 +1,7 @@
 package chat.platform.plus.trigger.listener;
 
-import chat.platform.plus.api.dto.GroupBuyNotifyDTO;
-import chat.platform.plus.domain.trade.service.pay.TradeService;
+import chat.platform.plus.api.dto.TeamCompleteNotifyDTO;
+import chat.platform.plus.domain.trade.service.trade.TradeService;
 import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class TeamSuccessListener {
+public class TeamCompleteListener {
 
     @Resource
     private TradeService tradeService;
@@ -46,9 +46,9 @@ public class TeamSuccessListener {
         try {
             log.info("浅度浏览AI服务 - 监听拼团完成消息队列 - 接收到消息：{}，进行结算", message);
             // 反序列化
-            GroupBuyNotifyDTO groupBuyNotifyDTO = JSON.parseObject(message, GroupBuyNotifyDTO.class);
+            TeamCompleteNotifyDTO teamCompleteNotifyDTO = JSON.parseObject(message, TeamCompleteNotifyDTO.class);
             // 结算
-            tradeService.orderTeamComplete(groupBuyNotifyDTO.getTeamId(), groupBuyNotifyDTO.getOutTradeNoList());
+            tradeService.orderTeamComplete(teamCompleteNotifyDTO.getTeamId(), teamCompleteNotifyDTO.getOutTradeNoList());
         } catch (Exception e) {
             log.info("浅度浏览AI服务 - 监听拼团完成消息队列 - 消息结算失败：{}", message, e);
             throw e;

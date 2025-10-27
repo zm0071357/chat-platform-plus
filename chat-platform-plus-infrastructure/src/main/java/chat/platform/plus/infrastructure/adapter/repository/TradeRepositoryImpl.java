@@ -1,19 +1,16 @@
 package chat.platform.plus.infrastructure.adapter.repository;
 
 import chat.platform.plus.domain.trade.adapter.event.OrderPaySuccessMessageEvent;
+import chat.platform.plus.domain.trade.adapter.event.OrderRefundSuccessMessageEvent;
 import chat.platform.plus.domain.trade.adapter.repository.TradeRepository;
-import chat.platform.plus.domain.trade.model.entity.GoodsDetailEntity;
-import chat.platform.plus.domain.trade.model.entity.GoodsEntity;
-import chat.platform.plus.domain.trade.model.entity.PayOrderEntity;
-import chat.platform.plus.domain.trade.model.entity.PrePayOrderEntity;
-import chat.platform.plus.domain.trade.model.valobj.GoodsTypeEnum;
-import chat.platform.plus.domain.trade.model.valobj.OrderStatusEnum;
-import chat.platform.plus.domain.trade.model.valobj.OrderTypesEnum;
+import chat.platform.plus.domain.trade.model.entity.*;
+import chat.platform.plus.domain.trade.model.valobj.*;
 import chat.platform.plus.domain.trade.service.deliver.DeliverService;
-import chat.platform.plus.infrastructure.dao.GoodsDao;
-import chat.platform.plus.infrastructure.dao.PayOrderDao;
+import chat.platform.plus.infrastructure.dao.*;
 import chat.platform.plus.infrastructure.dao.po.Goods;
+import chat.platform.plus.infrastructure.dao.po.HeaderCompensateTask;
 import chat.platform.plus.infrastructure.dao.po.PayOrder;
+import chat.platform.plus.infrastructure.dao.po.RefundOrder;
 import chat.platform.plus.infrastructure.event.EventPublisher;
 import chat.platform.plus.types.common.Constants;
 import chat.platform.plus.types.event.BaseEvent;
@@ -43,6 +40,12 @@ public class TradeRepositoryImpl implements TradeRepository {
     private PayOrderDao payOrderDao;
 
     @Resource
+    private RefundOrderDao refundOrderDao;
+
+    @Resource
+    private HeaderCompensateTaskDao headerCompensateTaskDao;
+
+    @Resource
     private Map<String, DeliverService> deliverServiceMap;
 
     @Resource
@@ -50,6 +53,9 @@ public class TradeRepositoryImpl implements TradeRepository {
 
     @Resource
     private OrderPaySuccessMessageEvent orderPaySuccessMessageEvent;
+
+    @Resource
+    private OrderRefundSuccessMessageEvent orderRefundSuccessMessageEvent;
 
     @Resource
     private RedissonClient redissonClient;
@@ -262,6 +268,157 @@ public class TradeRepositoryImpl implements TradeRepository {
                 lock.unlock();
             }
         }
+    }
+
+    @Override
+    public PayOrderEntity getPayOrder(String userId, String orderId) throws Exception {
+        PayOrder payOrderReq = new PayOrder();
+        payOrderReq.setUserId(userId);
+        payOrderReq.setOrderId(orderId);
+        PayOrder payOrder = payOrderDao.getPayOrder(payOrderReq);
+        if (payOrder == null) {
+            return null;
+        }
+        return PayOrderEntity.builder()
+                .userId(payOrder.getUserId())
+                .orderId(payOrder.getOrderId())
+                .goodsId(payOrder.getGoodsId())
+                .payPrice(payOrder.getPayPrice())
+                .orderStatusEnum(OrderStatusEnum.get(payOrder.getStatus()))
+                .orderTypesEnum(OrderTypesEnum.get(payOrder.getOrderType()))
+                .build();
+    }
+
+    @Override
+    public RefundOrderEntity getRefundOrder(String userId, String orderId) throws Exception {
+        RefundOrder refundOrderReq = new RefundOrder();
+        refundOrderReq.setUserId(userId);
+        refundOrderReq.setPayOrderId(orderId);
+        RefundOrder refundOrder = refundOrderDao.getRefundOrderByUserIdWithPayOrderId(refundOrderReq);
+        if (refundOrder == null) {
+            return null;
+        }
+        return RefundOrderEntity.builder()
+                .userId(refundOrder.getUserId())
+                .payOrderId(refundOrder.getPayOrderId())
+                .refundOrderCreateTime(refundOrder.getRefundOrderCreateTime())
+                .refundOrderPrice(refundOrder.getRefundOrderPrice())
+                .refundOrderStatusEnum(RefundOrderStatusEnum.get(refundOrder.getStatus()))
+                .orderTypesEnum(OrderTypesEnum.get(refundOrder.getPayOrderType()))
+                .build();
+    }
+
+    @Override
+    public void saveRefundOrder(RefundOrderEntity refundOrderEntity) {
+        refundOrderDao.insert(RefundOrder.builder()
+                        .userId(refundOrderEntity.getUserId())
+                        .payOrderId(refundOrderEntity.getPayOrderId())
+                        .refundOrderId(refundOrderEntity.getRefundOrderId())
+                        .refundOrderCreateTime(refundOrderEntity.getRefundOrderCreateTime())
+                        .refundOrderPrice(refundOrderEntity.getRefundOrderPrice())
+                        .status(refundOrderEntity.getRefundOrderStatusEnum().getStatus())
+                        .payOrderType(refundOrderEntity.getOrderTypesEnum().getType())
+                .build());
+    }
+
+    @Override
+    public void orderRefundSuccess(String refundOrderId, Date refundTime) throws Exception {
+        RefundOrder getRefundOrderReq = new RefundOrder();
+        getRefundOrderReq.setRefundOrderId(refundOrderId);
+        RefundOrder refundOrder = refundOrderDao.getRefundOrderByRefundOrderId(getRefundOrderReq);
+        // 更新退款时间和退款状态为退款成功
+        RefundOrder refundOrderReq = new RefundOrder();
+        refundOrderReq.setRefundOrderId(refundOrderId);
+        refundOrderReq.setStatus(2);
+        refundOrderReq.setRefundTime(refundTime);
+        Integer updateCount = refundOrderDao.updateOrderRefundSuccess(refundOrderReq);
+        if (updateCount != 1) {
+            throw new Exception("更新记录为0");
+        }
+
+        // 拼团类型订单 - 将退单订单ID和退单完成时间回调给拼团服务
+        if (OrderTypesEnum.get(refundOrder.getPayOrderType()).equals(OrderTypesEnum.GROUPBUY)) {
+            log.info("订单ID：{}，订单类型：{}，发送退单回调MQ消息", refundOrder.getPayOrderId(), OrderTypesEnum.GROUPBUY.getDesc());
+            // MQ发送消息
+            BaseEvent.EventMessage<OrderRefundSuccessMessageEvent.OrderRefundSuccessMessage> orderRefundSuccessMessageEventMessage = orderRefundSuccessMessageEvent.buildEventMessage(
+                    OrderRefundSuccessMessageEvent.OrderRefundSuccessMessage.builder()
+                            .userId(refundOrder.getUserId())
+                            .payOrderId(refundOrder.getPayOrderId())
+                            .refundOrderId(refundOrderId)
+                            .refundTime(refundTime)
+                            .build()
+            );
+            OrderRefundSuccessMessageEvent.OrderRefundSuccessMessage orderRefundSuccessMessage = orderRefundSuccessMessageEventMessage.getData();
+            eventPublisher.publish(orderRefundSuccessMessageEvent.topic(), JSON.toJSONString(orderRefundSuccessMessage));
+        }
+    }
+
+    @Override
+    public List<HeaderCompensateTaskEntity> getUnCompleteHeaderRefundCompensateTaskList() throws Exception {
+        List<HeaderCompensateTaskEntity> headerCompensateTaskEntityList = new ArrayList<>();
+        List<HeaderCompensateTask> headerCompensateTaskList = headerCompensateTaskDao.getUnCompleteHeaderRefundCompensateTaskList();
+        if (headerCompensateTaskList != null && !headerCompensateTaskList.isEmpty()) {
+            for (HeaderCompensateTask headerCompensateTask : headerCompensateTaskList) {
+                headerCompensateTaskEntityList.add(HeaderCompensateTaskEntity.builder()
+                                .headerId(headerCompensateTask.getHeaderId())
+                                .teamId(headerCompensateTask.getTeamId())
+                                .teamStatus(headerCompensateTask.getStatus())
+                                .headerCompensateTaskEnum(HeaderCompensateTaskEnum.get(headerCompensateTask.getStatus()))
+                        .build());
+            }
+        }
+        return headerCompensateTaskEntityList;
+    }
+
+    @Override
+    public void saveHeaderRefundCompensateTask(String headerId, String teamId, Integer teamStatus) {
+        // 保存团长退单补偿任务
+        HeaderCompensateTask headerCompensateTask = HeaderCompensateTask.builder()
+                .headerId(headerId)
+                .points(20)
+                .teamId(teamId)
+                .teamStatus(teamStatus)
+                .status(HeaderCompensateTaskEnum.INIT.getStatus())
+                .build();
+        headerCompensateTaskDao.insert(headerCompensateTask);
+    }
+
+    @Override
+    @Transactional(timeout = 500)
+    public void headerRefundCompensate(String headerId, String teamId, Integer teamStatus) throws Exception {
+        // 积分发放
+        DeliverService deliverService = deliverServiceMap.get(GoodsTypeEnum.POINTS.getDeliverStrategy());
+        deliverService.deliver(headerId, 20);
+        // 更新拼团组队状态和补偿任务状态
+        HeaderCompensateTask headerCompensateTask = new HeaderCompensateTask();
+        headerCompensateTask.setHeaderId(headerId);
+        headerCompensateTask.setTeamId(teamId);
+        headerCompensateTask.setTeamStatus(teamStatus);
+        headerCompensateTask.setStatus(1);
+        Integer updateCount = headerCompensateTaskDao.updateTaskStatusComplete(headerCompensateTask);
+        if (updateCount != 1) {
+            throw new Exception("更新记录为0");
+        }
+    }
+
+    @Override
+    public void headerRefundCompensateFail(String headerId, String teamId, Integer teamStatus) throws Exception {
+        // 更新拼团组队状态和补偿任务状态
+        HeaderCompensateTask headerCompensateTask = new HeaderCompensateTask();
+        headerCompensateTask.setHeaderId(headerId);
+        headerCompensateTask.setTeamId(teamId);
+        headerCompensateTask.setTeamStatus(teamStatus);
+        headerCompensateTask.setStatus(2);
+        Integer updateCount = headerCompensateTaskDao.updateTaskStatusComplete(headerCompensateTask);
+        if (updateCount != 1) {
+            throw new Exception("更新记录为0");
+        }
+    }
+
+    @Override
+    public List<String> getUnNotifyRefundOrderIdList() {
+        List<String> refundOrderIdList = refundOrderDao.getUnNotifyRefundOrderIdList();
+        return refundOrderIdList == null || refundOrderIdList.isEmpty() ? null : refundOrderIdList;
     }
 
 }

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chat.platform.plus.infrastructure.dao.RefundOrderDao">
+
+    <resultMap id="RefundOrderResultMap" type="chat.platform.plus.infrastructure.dao.po.RefundOrder">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="pay_order_id" property="payOrderId"/>
+        <result column="refund_order_id" property="refundOrderId"/>
+        <result column="refund_order_create_time" property="refundOrderCreateTime"/>
+        <result column="refund_order_price" property="refundOrderPrice"/>
+        <result column="status" property="status"/>
+        <result column="pay_order_type" property="payOrderType"/>
+        <result column="refund_time" property="refundTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="chat.platform.plus.infrastructure.dao.po.RefundOrder">
+        insert into refund_order(
+            user_id, pay_order_id, refund_order_id, refund_order_create_time, refund_order_price,
+            status, pay_order_type, create_time, update_time)
+        values (
+                #{userId}, #{payOrderId}, #{refundOrderId}, #{refundOrderCreateTime}, #{refundOrderPrice},
+                #{status}, #{payOrderType}, now(), now()
+               )
+    </insert>
+
+    <select id="getRefundOrderByUserIdWithPayOrderId" resultMap="RefundOrderResultMap">
+        select user_id, pay_order_id, refund_order_id, refund_order_create_time, refund_order_price,
+               status, pay_order_type
+        from refund_order
+        where user_id = #{userId} and
+            pay_order_id = #{payOrderId}
+    </select>
+
+    <select id="getRefundOrderByRefundOrderId" resultMap="RefundOrderResultMap">
+        select user_id, pay_order_id, refund_order_id, refund_order_create_time, refund_order_price,
+               status, pay_order_type
+        from refund_order
+        where refund_order_id = #{refundOrderId}
+    </select>
+
+    <update id="updateOrderRefundSuccess" parameterType="chat.platform.plus.infrastructure.dao.po.RefundOrder">
+        update refund_order
+        set refund_time = #{refundTime}, status = #{status}, update_time = now()
+        where refund_order_id = #{refundOrderId}
+    </update>
+
+    <select id="getUnNotifyRefundOrderIdList" resultType="java.lang.String">
+        <![CDATA[
+        select refund_order_id
+        from refund_order
+        where status = 1 and now() >= refund_order_create_time + interval 1 minute
+        order by id asc
+            limit 50
+        ]]>
+    </select>
+
+</mapper>

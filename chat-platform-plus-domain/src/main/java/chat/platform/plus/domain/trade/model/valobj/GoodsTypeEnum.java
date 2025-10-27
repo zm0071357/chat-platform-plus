@@ -14,7 +14,8 @@ public enum GoodsTypeEnum {
 
     COUNT(1, "count", "调用次数"),
     VIP(2, "vip", "VIP资格"),
-    OTHER(3, "other", "其他")
+    OTHER(3, "other", "其他"),
+    POINTS(4, "points", "积分"),
     ;
 
     private Integer type;

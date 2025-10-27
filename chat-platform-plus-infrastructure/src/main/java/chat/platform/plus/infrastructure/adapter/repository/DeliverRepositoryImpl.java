@@ -36,4 +36,15 @@ public class DeliverRepositoryImpl implements DeliverRepository {
         }
     }
 
+    @Override
+    public void deliverPoints(String userId, Integer goodsExpr) throws Exception {
+        User userReq = new User();
+        userReq.setUserId(userId);
+        userReq.setPoints(goodsExpr);
+        Integer updateCount = userDao.updatePoints(userReq);
+        if (updateCount != 1) {
+            throw new Exception("更新记录为0");
+        }
+    }
+
 }

@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LockOrderEntity {
+public class GroupBuyLockOrderEntity {
 
     /**
      * 原始价格

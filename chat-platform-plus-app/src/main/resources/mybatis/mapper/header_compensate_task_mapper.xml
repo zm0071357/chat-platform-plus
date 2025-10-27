@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chat.platform.plus.infrastructure.dao.HeaderCompensateTaskDao">
+
+    <resultMap id="ResultMap" type="chat.platform.plus.infrastructure.dao.po.HeaderCompensateTask">
+        <id column="id" property="id"/>
+        <result column="header_id" property="headerId"/>
+        <result column="points" property="points"/>
+        <result column="team_id" property="teamId"/>
+        <result column="team_status" property="teamStatus"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="chat.platform.plus.infrastructure.dao.po.HeaderCompensateTask">
+        insert into header_compensate_task (
+            header_id, points, team_id, team_status, status, create_time, update_time
+        )
+        values (
+            #{headerId}, #{points}, #{teamId}, #{teamStatus}, #{status}, now(), now()
+        )
+    </insert>
+
+    <select id="getUnCompleteHeaderRefundCompensateTaskList" resultMap="ResultMap" parameterType="chat.platform.plus.infrastructure.dao.po.HeaderCompensateTask">
+        select header_id, points, team_id, team_status, status
+        from header_compensate_task
+        where status = 0
+    </select>
+
+    <update id="updateTaskStatusComplete" parameterType="chat.platform.plus.infrastructure.dao.po.HeaderCompensateTask">
+        update header_compensate_task
+        set team_status = #{teamStatus}, status = #{status}, update_time = now()
+        where header_id = #{headerId} and team_id = #{teamId}
+    </update>
+
+</mapper>

@@ -63,4 +63,11 @@
         WHERE user_id = #{userId}
     </update>
 
+    <!--  更新用户积分点数  -->
+    <update id="updatePoints" parameterType="chat.platform.plus.infrastructure.dao.po.User">
+        UPDATE user
+        SET points = points + #{points}, update_time = now()
+        WHERE user_id = #{userId}
+    </update>
+
 </mapper>

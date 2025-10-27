@@ -67,21 +67,45 @@ spring:
     config:
       # 生产者
       producer:
+        # 交换机
         exchange: chat_platform_plus_exchange
+        # 消息主题配置
+        # 订单支付成功回调
         topic_order_pay_success:
           topic: topic.order_pay_success
           queue: chat_platform_plus_order_pay_success_queue
+
+        # 订单退款成功回调
+        topic_order_refund_success:
+          topic: topic.order_refund_success
+          queue: chat_platform_plus_order_refund_success_queue
+
       # 消费者
       consumer:
+        # 消息主题配置
+        # 订单支付成功回调
+        topic_order_pay_success:
+          exchange: chat_platform_plus_exchange
+          routing_key: topic.order_pay_success
+          queue: chat_platform_plus_order_pay_success_queue
+
+        # 拼团完成回调
         topic_team_success:
           exchange: groupbuy_market_plus_exchange
           routing_key: topic.team_success
           queue: groupbuy_market_plus_topic_team_success_queue
 
-        topic_order_pay_success:
-          exchange: chat_platform_plus_exchange
-          routing_key: topic.order_pay_success
-          queue: chat_platform_plus_order_pay_success_queue
+        # 拼团退单回调
+        topic_order_refund:
+          exchange: groupbuy_market_plus_exchange
+          routing_key: topic.order_refund
+          queue: groupbuy_market_plus_topic_order_refund_queue
+
+        # 团长退单补偿回调
+        topic_header_refund:
+          exchange: groupbuy_market_plus_exchange
+          routing_key: topic.header_refund
+          queue: groupbuy_market_plus_topic_header_refund_queue
 
 # MyBatis 配置
 mybatis:
@@ -152,8 +176,8 @@ github:
 ltzf:
   sdk:
     config:
-      app_id:      # 应用者 Id
-      mch_id:      # 商户号
+      app_id: # 应用者 Id
+      mch_id: # 商户号
       partner_key: # 密钥
       notify_url:
 
@@ -161,8 +185,10 @@ ltzf:
 app:
   config:
     groupbuy-market-plus:
-      api_url:
-      notify_url:
+      api_url: http://localhost:8091    # 请求服务URL
+      notify_url: http://localhost:8094/trade/groupbuy/notify    # 拼团完成回调URL
+      refund_notify_url: http://localhost:8094/trade/groupbuy/refund_notify     # 退单回调URL
+      header_refund_notify_url: http://localhost:8094/trade/groupbuy/header_refund_notify     # 团长退单补偿URL
       source: s01
       channel: c01
 

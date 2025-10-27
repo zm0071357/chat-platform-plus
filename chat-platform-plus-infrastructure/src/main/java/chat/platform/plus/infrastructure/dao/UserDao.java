@@ -41,4 +41,11 @@ public interface UserDao {
      * @return
      */
     Integer updateVip(User userReq);
+
+    /**
+     * 更新用户积分点数
+     * @param userReq
+     * @return
+     */
+    Integer updatePoints(User userReq);
 }

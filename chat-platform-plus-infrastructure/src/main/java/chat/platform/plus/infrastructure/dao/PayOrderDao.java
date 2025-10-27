@@ -88,4 +88,11 @@ public interface PayOrderDao {
      * @return
      */
     Integer updateOrderPrice(PayOrder payOrderReq);
+
+    /**
+     * 获取支付订单
+     * @param payOrderReq
+     * @return
+     */
+    PayOrder getPayOrder(PayOrder payOrderReq);
 }

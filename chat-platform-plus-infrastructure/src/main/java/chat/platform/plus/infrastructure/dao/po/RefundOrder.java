@@ -5,16 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * 用户
+ * 退单订单
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class RefundOrder {
 
     /**
      * 自增ID
@@ -22,48 +23,44 @@ public class User {
     private Long id;
 
     /**
-     * 账号
+     * 用户ID
      */
     private String userId;
 
     /**
-     * 用户名
+     * 支付订单ID
      */
-    private String userName;
+    private String payOrderId;
 
     /**
-     * 用户绑定邮箱
+     * 退单订单ID
      */
-    private String userEmail;
+    private String refundOrderId;
 
     /**
-     * 是否黑名单
-     * 0 否
-     * 1 是
+     * 退单申请时间
      */
-    private Integer isBlack;
+    private Date refundOrderCreateTime;
 
     /**
-     * 是否VIP用户 - VIP用户没有调用次数限制
-     * 0 否
-     * 1 是
+     * 退单金额
      */
-    private Integer isVip;
+    private BigDecimal refundOrderPrice;
 
     /**
-     * 可调用次数 默认50次
+     * 退单状态 - 1退款中、2退款成功、3退款失败
      */
-    private Integer invokeCount;
+    private Integer status;
 
     /**
-     * 积分 - 用于后续营销动作
+     * 支付订单类型 - 1 直接购买  2 拼团购买
      */
-    private Integer points;
+    private Integer payOrderType;
 
     /**
-     * 密码
+     * 退单完成时间
      */
-    private String password;
+    private Date refundTime;
 
     /**
      * 创建时间
