@@ -54,9 +54,10 @@ public interface TradePort {
      * @param goodsId 商品ID
      * @param activityId 活动ID
      * @param orderId 订单ID
+     * @param inviteId 邀请码
      * @return
      */
-    GroupBuyLockOrderEntity lockOrder(String userId, String teamId, String goodsId, Long activityId, String orderId);
+    GroupBuyLockOrderEntity lockOrder(String userId, String teamId, String goodsId, Long activityId, String orderId, String inviteId);
 
     /**
      * 拼团营销服务 - 结算

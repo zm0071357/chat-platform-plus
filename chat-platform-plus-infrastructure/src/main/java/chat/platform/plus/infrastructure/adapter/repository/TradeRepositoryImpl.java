@@ -421,4 +421,12 @@ public class TradeRepositoryImpl implements TradeRepository {
         return refundOrderIdList == null || refundOrderIdList.isEmpty() ? null : refundOrderIdList;
     }
 
+    @Override
+    public void inviteRebate(List<String> inviteUserIdList) throws Exception {
+        DeliverService deliverService = deliverServiceMap.get(GoodsTypeEnum.POINTS.getDeliverStrategy());
+        for (String inviteUserId : inviteUserIdList) {
+            deliverService.deliver(inviteUserId, 10);
+        }
+    }
+
 }

@@ -26,8 +26,9 @@ public interface TradeService {
      * 拼团完成
      * @param teamId 组队ID
      * @param outTradeNoList 外部交易单号集合
+     * @param inviteUserIdList 邀请人ID集合
      */
-    void orderTeamComplete(String teamId, List<String> outTradeNoList) throws Exception;
+    void orderTeamComplete(String teamId, List<String> outTradeNoList, List<String> inviteUserIdList) throws Exception;
 
     /**
      * 退单

@@ -48,7 +48,7 @@ public class TeamCompleteListener {
             // 反序列化
             TeamCompleteNotifyDTO teamCompleteNotifyDTO = JSON.parseObject(message, TeamCompleteNotifyDTO.class);
             // 结算
-            tradeService.orderTeamComplete(teamCompleteNotifyDTO.getTeamId(), teamCompleteNotifyDTO.getOutTradeNoList());
+            tradeService.orderTeamComplete(teamCompleteNotifyDTO.getTeamId(), teamCompleteNotifyDTO.getOutTradeNoList(), teamCompleteNotifyDTO.getInviteUserIdList());
         } catch (Exception e) {
             log.info("浅度浏览AI服务 - 监听拼团完成消息队列 - 消息结算失败：{}", message, e);
             throw e;

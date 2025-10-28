@@ -101,7 +101,7 @@ public class TradePortImpl implements TradePort {
     }
 
     @Override
-    public GroupBuyLockOrderEntity lockOrder(String userId, String teamId, String goodsId, Long activityId, String orderId) {
+    public GroupBuyLockOrderEntity lockOrder(String userId, String teamId, String goodsId, Long activityId, String orderId, String inviteId) {
         // 请求参数
         LockOrderRequestDTO requestDTO = new LockOrderRequestDTO();
         requestDTO.setUserId(userId);
@@ -110,6 +110,7 @@ public class TradePortImpl implements TradePort {
         requestDTO.setActivityId(activityId);
         requestDTO.setSource(source);
         requestDTO.setChannel(channel);
+        requestDTO.setInviteId(inviteId);
         requestDTO.setOutTradeNo(orderId);
         //requestDTO.setNotifyUrl(groupBuyNotifyUrl);
         requestDTO.setNotifyMQ();

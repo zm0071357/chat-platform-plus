@@ -169,5 +169,15 @@ public interface TradeRepository {
      */
     void headerRefundCompensateFail(String headerId, String teamId, Integer teamStatus) throws Exception;
 
+    /**
+     * 获取未回调退单单号集合
+     * @return
+     */
     List<String> getUnNotifyRefundOrderIdList();
+
+    /**
+     * 邀请返利
+     * @param inviteUserIdList 邀请人ID集合
+     */
+    void inviteRebate(List<String> inviteUserIdList) throws Exception;
 }

@@ -107,6 +107,7 @@ public class ShoppingController implements ShoppingService {
                             .goodsId(createPayOrderRequestDTO.getGoodsId())
                             .activityId(createPayOrderRequestDTO.getActivityId())
                             .orderTypesEnum(OrderTypesEnum.get(createPayOrderRequestDTO.getOrderType()))
+                            .inviteId(createPayOrderRequestDTO.getInviteId())
                             .build());
             log.info("创建支付订单完成，用户ID：{}，商品ID：{}，订单信息：{}", createPayOrderRequestDTO.getUserId(), createPayOrderRequestDTO.getGoodsId(), JSON.toJSONString(payOrderEntity));
             return Response.<CreatePayOrderResponseDTO>builder()
@@ -173,7 +174,7 @@ public class ShoppingController implements ShoppingService {
         }
         try {
             log.info("拼团营销服务 - 成团回调结算开始：{}", JSON.toJSONString(teamCompleteNotifyDTO));
-            tradeService.orderTeamComplete(teamCompleteNotifyDTO.getTeamId(), teamCompleteNotifyDTO.getOutTradeNoList());
+            tradeService.orderTeamComplete(teamCompleteNotifyDTO.getTeamId(), teamCompleteNotifyDTO.getOutTradeNoList(), teamCompleteNotifyDTO.getInviteUserIdList());
             log.info("拼团营销服务 - 成团回调结算完成：{}", JSON.toJSONString(teamCompleteNotifyDTO));
             return "SUCCESS";
         } catch (Exception e) {

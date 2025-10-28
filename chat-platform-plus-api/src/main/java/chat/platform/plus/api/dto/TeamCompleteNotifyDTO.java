@@ -19,4 +19,9 @@ public class TeamCompleteNotifyDTO {
      * 外部交易单号集合
      */
     private List<String> outTradeNoList;
+
+    /**
+     * 邀请人ID集合
+     */
+    private List<String> inviteUserIdList;
 }

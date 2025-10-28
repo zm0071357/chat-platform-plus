@@ -35,4 +35,9 @@ public class CreatePayOrderRequestDTO {
      */
     private Integer orderType;
 
+    /**
+     * 邀请码
+     */
+    private String inviteId;
+
 }

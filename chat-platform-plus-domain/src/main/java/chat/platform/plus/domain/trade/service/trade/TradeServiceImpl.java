@@ -25,8 +25,8 @@ public class TradeServiceImpl extends AbstractTradeService {
     }
 
     @Override
-    protected GroupBuyLockOrderEntity lockOrder(String userId, String teamId, String goodsId, Long activityId, String orderId) {
-        return tradePort.lockOrder(userId, teamId, goodsId, activityId, orderId);
+    protected GroupBuyLockOrderEntity lockOrder(String userId, String teamId, String goodsId, Long activityId, String orderId, String inviteId) {
+        return tradePort.lockOrder(userId, teamId, goodsId, activityId, orderId, inviteId);
     }
 
     @Override
@@ -35,13 +35,15 @@ public class TradeServiceImpl extends AbstractTradeService {
     }
 
     @Override
-    public void orderTeamComplete(String teamId, List<String> outTradeNoList) throws Exception {
+    public void orderTeamComplete(String teamId, List<String> outTradeNoList, List<String> inviteUserIdList) throws Exception {
         // 更新订单状态为拼团完成
         log.info("更新订单状态为拼团完成，组队ID：{}，订单集合：{}", teamId, outTradeNoList);
         tradeRepository.updateOrderStatusTeamComplete(outTradeNoList);
         // 发货
         log.info("拼团完成，进行发货，组队ID：{}，订单集合：{}", teamId, outTradeNoList);
         tradeRepository.deliverGoods(outTradeNoList);
+        // 邀请返利
+        tradeRepository.inviteRebate(inviteUserIdList);
     }
 
     @Override

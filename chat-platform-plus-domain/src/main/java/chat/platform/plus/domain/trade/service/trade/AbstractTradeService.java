@@ -49,7 +49,7 @@ public abstract class AbstractTradeService implements TradeService {
             if (OrderTypesEnum.GROUPBUY.equals(unPaidPayOrderEntity.getOrderTypesEnum()) && unPaidPayOrderEntity.getDeductionPrice() == null) {
                 log.info("用户存在掉单 - 拼团锁单未成功掉单，用户ID：{}，商品ID：{}，订单信息：{}", shopCartEntity.getUserId(), shopCartEntity.getGoodsId(), JSON.toJSONString(unPaidPayOrderEntity));
                 // 锁单
-                GroupBuyLockOrderEntity groupBuyLockOrderEntity = this.lockOrder(shopCartEntity.getUserId(), shopCartEntity.getTeamId(), goodsDetailEntity.getGoodsId(), shopCartEntity.getActivityId(), unPaidPayOrderEntity.getOrderId());
+                GroupBuyLockOrderEntity groupBuyLockOrderEntity = this.lockOrder(shopCartEntity.getUserId(), shopCartEntity.getTeamId(), goodsDetailEntity.getGoodsId(), shopCartEntity.getActivityId(), unPaidPayOrderEntity.getOrderId(), shopCartEntity.getInviteId());
                 prepayResponse = doPrePayOrder(unPaidPayOrderEntity.getOrderId(), unPaidPayOrderEntity.getOrderPrice(), goodsDetailEntity.getGoodsName(), groupBuyLockOrderEntity);
             } else if (OrderTypesEnum.GROUPBUY.equals(unPaidPayOrderEntity.getOrderTypesEnum())) {
                 log.info("用户存在掉单 - 拼团锁单成功后掉单，生成蓝兔支付订单，用户ID：{}，商品ID：{}，订单信息：{}", shopCartEntity.getUserId(), shopCartEntity.getGoodsId(), JSON.toJSONString(unPaidPayOrderEntity));
@@ -110,7 +110,7 @@ public abstract class AbstractTradeService implements TradeService {
                 .build();
         if (OrderTypesEnum.GROUPBUY.equals(shopCartEntity.getOrderTypesEnum())) {
             log.info("进行拼团锁单，用户ID：{}，商品ID：{}，活动ID：{}", shopCartEntity.getUserId(), shopCartEntity.getGoodsId(), shopCartEntity.getActivityId());
-            groupBuyLockOrderEntity = this.lockOrder(shopCartEntity.getUserId(), shopCartEntity.getTeamId(), shopCartEntity.getGoodsId(), shopCartEntity.getActivityId(), orderId);
+            groupBuyLockOrderEntity = this.lockOrder(shopCartEntity.getUserId(), shopCartEntity.getTeamId(), shopCartEntity.getGoodsId(), shopCartEntity.getActivityId(), orderId, shopCartEntity.getInviteId());
         }
         log.info("订单价格计算结果：{}", JSON.toJSONString(groupBuyLockOrderEntity));
 
@@ -227,9 +227,10 @@ public abstract class AbstractTradeService implements TradeService {
      * @param goodsId 商品ID
      * @param activityId 活动ID
      * @param orderId 订单ID
+     * @param inviteId 邀请码
      * @return
      */
-    protected abstract GroupBuyLockOrderEntity lockOrder(String userId, String teamId, String goodsId, Long activityId, String orderId);
+    protected abstract GroupBuyLockOrderEntity lockOrder(String userId, String teamId, String goodsId, Long activityId, String orderId, String inviteId);
 
     /**
      * 退单

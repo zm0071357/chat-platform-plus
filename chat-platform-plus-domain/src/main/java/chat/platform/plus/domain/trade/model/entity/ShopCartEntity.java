@@ -40,4 +40,9 @@ public class ShopCartEntity {
      */
     private OrderTypesEnum orderTypesEnum;
 
+    /**
+     * 邀请码
+     */
+    private String inviteId;
+
 }
